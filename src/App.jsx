@@ -1,10 +1,16 @@
+import { Route, Routes } from "react-router"
+import Navbar from "./Components/Navbar"
+import Home from "./Pages/Home"
+
 
 
 function App() {
   return (
     <>
-
-      <h1 className="btn">Vite + React</h1>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
 
     </>
   )
