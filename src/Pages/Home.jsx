@@ -3,6 +3,7 @@ import Hero from '../Components/Hero'
 import Countup from '../Components/Countup'
 import WhyChooseUs from '../Components/WhyChooseUs'
 import SpecialOffers from '../Components/SpecialOffers'
+import Featured from '../Components/Featured'
 
 const Home = () => {
     return (
@@ -11,6 +12,7 @@ const Home = () => {
             <Countup />
             <SpecialOffers />
             <WhyChooseUs />
+            <Featured />
 
         </div>
     )
