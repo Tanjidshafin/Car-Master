@@ -3,13 +3,16 @@
 import { useState, useRef } from "react"
 import { motion, AnimatePresence, useInView } from "framer-motion"
 
-const cars = [
+const Allcars = [
     {
         id: 1,
+        brand: "Porsche",
+        model: "Cayenne",
         name: "Porsche Cayenne",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/cayenman5.png",
         price: 75000.0,
         rating: 4,
+        status: "recommended",
         description: "The Porsche Cayenne is a luxury midsize SUV offering powerful performance, premium interiors, and advanced technology features.",
         specs: {
             condition: "New",
@@ -21,10 +24,13 @@ const cars = [
     },
     {
         id: 2,
+        brand: "Porsche",
+        model: "911",
         name: "Porsche 911",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/porsche-one.png",
         price: 92000.0,
         rating: 5,
+        status: "specialOffer",
         description: "The Porsche 911 is an iconic sports car known for its sleek design, exhilarating performance, and precision engineering.",
         specs: {
             condition: "New",
@@ -36,10 +42,13 @@ const cars = [
     },
     {
         id: 3,
+        brand: "Porsche",
+        model: "Panamera",
         name: "Porsche Panamera",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/paramela1.png",
         price: 67000.0,
         rating: 4,
+        status: "recommended",
         description: "The Porsche Panamera combines sports car performance with the comfort and luxury of a premium sedan, making it a unique offering in its class.",
         specs: {
             condition: "Used",
@@ -51,10 +60,13 @@ const cars = [
     },
     {
         id: 4,
+        brand: "Porsche",
+        model: "Macan",
         name: "Porsche Macan",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/macan3.png",
         price: 80000.0,
         rating: 5,
+        status: "specialOffer",
         description: "A compact luxury SUV that blends sporty performance with daily usability, offering a thrilling yet practical drive.",
         specs: {
             condition: "New",
@@ -66,10 +78,13 @@ const cars = [
     },
     {
         id: 5,
+        brand: "Jaguar",
+        model: "XE",
         name: "Jaguar XE",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/xe1.png",
         price: 73000.0,
         rating: 4,
+        status: "recommended",
         description: "A premium sports sedan that delivers a refined driving experience with powerful engine options and elegant styling.",
         specs: {
             condition: "New",
@@ -81,10 +96,13 @@ const cars = [
     },
     {
         id: 6,
+        brand: "Tesla",
+        model: "Model X",
         name: "Tesla Model X",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/vehicle-two.png",
         price: 85000.0,
         rating: 5,
+        status: "specialOffer",
         description: "A high-performance electric SUV offering cutting-edge technology, exceptional acceleration, and long-range capabilities.",
         specs: {
             condition: "Used",
@@ -96,10 +114,13 @@ const cars = [
     },
     {
         id: 7,
+        brand: "Porsche",
+        model: "Macan GTS",
         name: "Porsche Macan GTS",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/macan1.png",
         price: 81000.0,
         rating: 4,
+        status: "recommended",
         description: "A performance-focused version of the Macan, featuring enhanced handling, a sportier design, and a thrilling drive experience.",
         specs: {
             condition: "New",
@@ -111,10 +132,13 @@ const cars = [
     },
     {
         id: 8,
+        brand: "Jaguar",
+        model: "XE SV Project 8",
         name: "Jaguar XE SV Project 8",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/cayenne1.png",
         price: 74000.0,
         rating: 4,
+        status: "specialOffer",
         description: "A track-ready version of the Jaguar XE with extreme performance upgrades and an aggressive design.",
         specs: {
             condition: "Used",
@@ -126,10 +150,13 @@ const cars = [
     },
     {
         id: 9,
+        brand: "Porsche",
+        model: "Panamera Turbo",
         name: "Porsche Panamera Turbo",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/PANAMERA1.png",
         price: 110000.0,
         rating: 5,
+        status: "recommended",
         description: "A luxury high-performance sedan combining speed, technology, and comfort for an exhilarating drive.",
         specs: {
             condition: "New",
@@ -141,10 +168,13 @@ const cars = [
     },
     {
         id: 10,
+        brand: "Porsche",
+        model: "Taycan Turbo S",
         name: "Porsche Taycan Turbo S",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/car-1.png",
         price: 150000.0,
         rating: 5,
+        status: "specialOffer",
         description: "Porsche's fully electric sports car, delivering breathtaking acceleration and cutting-edge electric technology.",
         specs: {
             condition: "New",
@@ -155,7 +185,7 @@ const cars = [
         },
     },
 ];
-
+const cars = Allcars.filter(car => car.status === "recommended")
 export default function Recommended() {
     const [currentIndex, setCurrentIndex] = useState(0)
     const containerRef = useRef(null)
@@ -170,7 +200,7 @@ export default function Recommended() {
     }
 
     return (
-        <div className="w-full py-16 px-4 mt-32 bg-white dark:bg-gray-900" ref={containerRef}>
+        <div className="w-full py-16 px-4 mt-20 bg-white dark:bg-gray-900" ref={containerRef}>
             <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}

@@ -4,13 +4,16 @@ import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 
-const cars = [
+const Allcars = [
     {
         id: 1,
+        brand: "Porsche",
+        model: "Cayenne",
         name: "Porsche Cayenne",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/cayenman5.png",
         price: 75000.0,
         rating: 4,
+        status: "recommended",
         description: "The Porsche Cayenne is a luxury midsize SUV offering powerful performance, premium interiors, and advanced technology features.",
         specs: {
             condition: "New",
@@ -22,10 +25,13 @@ const cars = [
     },
     {
         id: 2,
+        brand: "Porsche",
+        model: "911",
         name: "Porsche 911",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/porsche-one.png",
         price: 92000.0,
         rating: 5,
+        status: "specialOffer",
         description: "The Porsche 911 is an iconic sports car known for its sleek design, exhilarating performance, and precision engineering.",
         specs: {
             condition: "New",
@@ -37,10 +43,13 @@ const cars = [
     },
     {
         id: 3,
+        brand: "Porsche",
+        model: "Panamera",
         name: "Porsche Panamera",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/paramela1.png",
         price: 67000.0,
         rating: 4,
+        status: "recommended",
         description: "The Porsche Panamera combines sports car performance with the comfort and luxury of a premium sedan, making it a unique offering in its class.",
         specs: {
             condition: "Used",
@@ -52,10 +61,13 @@ const cars = [
     },
     {
         id: 4,
+        brand: "Porsche",
+        model: "Macan",
         name: "Porsche Macan",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/macan3.png",
         price: 80000.0,
         rating: 5,
+        status: "specialOffer",
         description: "A compact luxury SUV that blends sporty performance with daily usability, offering a thrilling yet practical drive.",
         specs: {
             condition: "New",
@@ -67,10 +79,13 @@ const cars = [
     },
     {
         id: 5,
+        brand: "Jaguar",
+        model: "XE",
         name: "Jaguar XE",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/xe1.png",
         price: 73000.0,
         rating: 4,
+        status: "recommended",
         description: "A premium sports sedan that delivers a refined driving experience with powerful engine options and elegant styling.",
         specs: {
             condition: "New",
@@ -82,10 +97,13 @@ const cars = [
     },
     {
         id: 6,
+        brand: "Tesla",
+        model: "Model X",
         name: "Tesla Model X",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/vehicle-two.png",
         price: 85000.0,
         rating: 5,
+        status: "specialOffer",
         description: "A high-performance electric SUV offering cutting-edge technology, exceptional acceleration, and long-range capabilities.",
         specs: {
             condition: "Used",
@@ -97,10 +115,13 @@ const cars = [
     },
     {
         id: 7,
+        brand: "Porsche",
+        model: "Macan GTS",
         name: "Porsche Macan GTS",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/macan1.png",
         price: 81000.0,
         rating: 4,
+        status: "recommended",
         description: "A performance-focused version of the Macan, featuring enhanced handling, a sportier design, and a thrilling drive experience.",
         specs: {
             condition: "New",
@@ -112,10 +133,13 @@ const cars = [
     },
     {
         id: 8,
+        brand: "Jaguar",
+        model: "XE SV Project 8",
         name: "Jaguar XE SV Project 8",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/cayenne1.png",
         price: 74000.0,
         rating: 4,
+        status: "specialOffer",
         description: "A track-ready version of the Jaguar XE with extreme performance upgrades and an aggressive design.",
         specs: {
             condition: "Used",
@@ -127,10 +151,13 @@ const cars = [
     },
     {
         id: 9,
+        brand: "Porsche",
+        model: "Panamera Turbo",
         name: "Porsche Panamera Turbo",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/PANAMERA1.png",
         price: 110000.0,
         rating: 5,
+        status: "recommended",
         description: "A luxury high-performance sedan combining speed, technology, and comfort for an exhilarating drive.",
         specs: {
             condition: "New",
@@ -142,10 +169,13 @@ const cars = [
     },
     {
         id: 10,
+        brand: "Porsche",
+        model: "Taycan Turbo S",
         name: "Porsche Taycan Turbo S",
         image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/car-1.png",
         price: 150000.0,
         rating: 5,
+        status: "specialOffer",
         description: "Porsche's fully electric sports car, delivering breathtaking acceleration and cutting-edge electric technology.",
         specs: {
             condition: "New",
@@ -156,8 +186,6 @@ const cars = [
         },
     },
 ];
-
-
 
 export default function SpecialOffers() {
     const [selectedCarIndex, setSelectedCarIndex] = useState(0)
@@ -170,14 +198,14 @@ export default function SpecialOffers() {
 
     const moveCarousel = (direction) => {
         if (direction === "left") {
-            setSelectedCarIndex((prevIndex) => (prevIndex - 1 + cars.length) % cars.length)
+            setSelectedCarIndex((prevIndex) => (prevIndex - 1 + Allcars.length) % Allcars.length)
             if (selectedCarIndex === startIndex) {
-                setStartIndex((prevStart) => (prevStart - 1 + cars.length) % cars.length)
+                setStartIndex((prevStart) => (prevStart - 1 + Allcars.length) % Allcars.length)
             }
         } else {
-            setSelectedCarIndex((prevIndex) => (prevIndex + 1) % cars.length)
-            if (selectedCarIndex === (startIndex + getVisibleCars() - 1) % cars.length) {
-                setStartIndex((prevStart) => (prevStart + 1) % cars.length)
+            setSelectedCarIndex((prevIndex) => (prevIndex + 1) % Allcars.length)
+            if (selectedCarIndex === (startIndex + getVisibleAllcars() - 1) % Allcars.length) {
+                setStartIndex((prevStart) => (prevStart + 1) % Allcars.length)
             }
         }
     }
@@ -186,7 +214,7 @@ export default function SpecialOffers() {
         setSelectedCarIndex(index)
     }
 
-    const getVisibleCars = () => {
+    const getVisibleAllcars = () => {
         if (typeof window !== "undefined") {
             if (window.innerWidth >= 1024) return 6
             if (window.innerWidth >= 768) return 4
@@ -198,18 +226,18 @@ export default function SpecialOffers() {
 
     useEffect(() => {
         const handleResize = () => {
-            const visibleCars = getVisibleCars()
-            if (selectedCarIndex < startIndex || selectedCarIndex >= startIndex + visibleCars) {
-                setStartIndex(Math.max(0, Math.min(selectedCarIndex, cars.length - visibleCars)))
+            const visibleAllcars = getVisibleAllcars()
+            if (selectedCarIndex < startIndex || selectedCarIndex >= startIndex + visibleAllcars) {
+                setStartIndex(Math.max(0, Math.min(selectedCarIndex, Allcars.length - visibleAllcars)))
             }
         }
 
         window.addEventListener("resize", handleResize)
         return () => window.removeEventListener("resize", handleResize)
-    }, [selectedCarIndex, startIndex, getVisibleCars])
+    }, [selectedCarIndex, startIndex, getVisibleAllcars])
 
-    const visibleCars = getVisibleCars()
-    const displayedCars = [...Array(visibleCars)].map((_, index) => cars[(startIndex + index) % cars.length])
+    const visibleAllcars = getVisibleAllcars()
+    const displayedAllcars = [...Array(visibleAllcars)].map((_, index) => Allcars[(startIndex + index) % Allcars.length])
 
     return (
         <section className="py-16 mt-40 px-4 md:py-24 bg-white dark:bg-gray-900">
@@ -263,11 +291,11 @@ export default function SpecialOffers() {
                                 exit={{ x: -100, opacity: 0 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                {displayedCars.map((car, index) => (
+                                {displayedAllcars.map((car, index) => (
                                     <motion.div
                                         key={car.id}
                                         className={`cursor-pointer flex-shrink-0`}
-                                        onClick={() => selectCar((startIndex + index) % cars.length)}
+                                        onClick={() => selectCar((startIndex + index) % Allcars.length)}
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.2 }}
                                     >
@@ -276,7 +304,7 @@ export default function SpecialOffers() {
                                                 src={car.image || "/placeholder.svg"}
                                                 alt={car.name}
                                                 className={`w-full h-full object-contain transition-all duration-300 
-                                                    ${selectedCarIndex === (startIndex + index) % cars.length ? "opacity-100" : "opacity-50 hover:opacity-75"}`}
+                                                    ${selectedCarIndex === (startIndex + index) % Allcars.length ? "opacity-100" : "opacity-50 hover:opacity-75"}`}
                                             />
                                         </div>
                                     </motion.div>
@@ -308,14 +336,14 @@ export default function SpecialOffers() {
                     className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center max-w-6xl mx-auto"
                 >
                     <div className="space-y-6">
-                        <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{cars[selectedCarIndex].name}</h3>
+                        <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{Allcars[selectedCarIndex].name}</h3>
 
                         <div className="flex items-center">
                             <div className="flex items-center mr-2">
                                 {[...Array(5)].map((_, i) => (
                                     <svg
                                         key={i}
-                                        className={`w-4 h-4 ${i < cars[selectedCarIndex].rating ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600"}`}
+                                        className={`w-4 h-4 ${i < Allcars[selectedCarIndex].rating ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600"}`}
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 20 20"
                                         fill="currentColor"
@@ -330,14 +358,14 @@ export default function SpecialOffers() {
                         <div className="space-y-2">
                             <p className="text-lg text-gray-700 dark:text-gray-300">From</p>
                             <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                                ${cars[selectedCarIndex].price.toLocaleString()}.00
+                                ${Allcars[selectedCarIndex].price.toLocaleString()}.00
                             </p>
                         </div>
 
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{cars[selectedCarIndex].description}</p>
+                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{Allcars[selectedCarIndex].description}</p>
 
                         <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
-                            {Object.entries(cars[selectedCarIndex].specs).map(([key, value]) => (
+                            {Object.entries(Allcars[selectedCarIndex].specs).map(([key, value]) => (
                                 <span key={key} className="flex items-center">
                                     <span className="mr-2 text-gray-400">•</span>
                                     {value}
@@ -346,15 +374,15 @@ export default function SpecialOffers() {
                         </div>
                     </div>
                     <motion.div
-                        key={cars[selectedCarIndex].id}
+                        key={Allcars[selectedCarIndex].id}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3 }}
                         className="relative aspect-[4/3] w-full h-full flex items-center justify-center"
                     >
                         <img
-                            src={cars[selectedCarIndex].image || "/placeholder.svg"}
-                            alt={cars[selectedCarIndex].name}
+                            src={Allcars[selectedCarIndex].image || "/placeholder.svg"}
+                            alt={Allcars[selectedCarIndex].name}
                             className="w-full h-full object-contain"
                         />
                     </motion.div>

@@ -14,7 +14,6 @@ export default function Navbar() {
 
     const routes = [
         { name: "Home", path: "/" },
-        { name: "Search", path: "/search" },
         { name: "All Cars", path: "/all-cars" },
         { name: "Used Cars", path: "/used-cars" },
     ]

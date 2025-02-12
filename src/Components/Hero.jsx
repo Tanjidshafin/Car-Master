@@ -37,10 +37,10 @@ export default function Hero() {
     useEffect(() => {
         const timer = setInterval(nextSlide, 5000)
         return () => clearInterval(timer)
-    }, [nextSlide]) // Added nextSlide to dependencies
+    }, [nextSlide])
 
     return (
-        <div className="relative h-[900px] max-w-screen-2xl mx-auto overflow-hidden">
+        <div className="relative h-screen max-w-screen-2xl  mx-auto overflow-hidden">
             <AnimatePresence initial={false}>
                 {slides.map(
                     (slide, index) =>
