@@ -73,7 +73,7 @@ export default function Navbar() {
                     animate="visible"
                     exit="hidden"
                     transition={{ type: "spring", stiffness: 100 }}
-                    className={`fixed top-0 w-full z-50 ${isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "bg-transparent"}`}
+                    className={`fixed top-0 w-full z-[1000] ${isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "bg-transparent"}`}
                 >
                     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center h-20">
