@@ -67,7 +67,7 @@ export default function Blogs() {
 
                         <div className="space-y-3">
                             <div className="flex items-center gap-4">
-                                <span className="text-sm font-semibold dark:text-white text-black">{article.admin}</span>
+                                <span className="text-sm font-semibold text-black">{article.admin}</span>
                                 <span className="text-sm text-blue-500">{article.category}</span>
                             </div>
 

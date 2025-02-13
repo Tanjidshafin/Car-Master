@@ -40,7 +40,7 @@ export default function Hero() {
     }, [nextSlide])
 
     return (
-        <div className="relative h-screen max-w-screen-2xl  mx-auto overflow-hidden">
+        <div className="relative md:h-screen h-[50rem] overflow-hidden">
             <AnimatePresence initial={false}>
                 {slides.map(
                     (slide, index) =>
