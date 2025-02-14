@@ -3,21 +3,18 @@ import { motion } from "framer-motion"
 export default function CarSkeleton() {
     return (
         <div className="grid lg:grid-cols-2 gap-8">
-            {/* Left Column Skeleton */}
+
             <div className="space-y-8">
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                    {/* Main Image Skeleton */}
                     <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800 animate-pulse" />
 
-                    {/* Thumbnails Skeleton */}
-                    <div className="grid grid-cols-5 gap-2">
-                        {[...Array(5)].map((_, i) => (
+                    <div className="grid grid-cols-4 gap-2">
+                        {[...Array(4)].map((_, i) => (
                             <div key={i} className="aspect-square rounded-lg bg-gray-200 dark:bg-gray-800 animate-pulse" />
                         ))}
                     </div>
                 </motion.div>
 
-                {/* Description Skeleton */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-4">
                     <div className="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
                     <div className="space-y-3">
@@ -28,14 +25,13 @@ export default function CarSkeleton() {
                 </motion.div>
             </div>
 
-            {/* Right Column Skeleton */}
+
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
                 className="space-y-6 lg:max-w-md"
             >
-                {/* Title Skeleton */}
                 <div className="space-y-2">
                     <div className="h-8 w-3/4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
                     <div className="flex items-center gap-2">
@@ -45,10 +41,8 @@ export default function CarSkeleton() {
                     </div>
                 </div>
 
-                {/* Price Skeleton */}
                 <div className="h-10 w-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
 
-                {/* Specs Grid Skeleton */}
                 <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     {[...Array(8)].map((_, i) => (
                         <div key={i} className="space-y-1">
@@ -58,7 +52,6 @@ export default function CarSkeleton() {
                     ))}
                 </div>
 
-                {/* Buttons Skeleton */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-3 flex-col sm:flex-row">
                         <div className="w-full h-12 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse" />
@@ -67,7 +60,6 @@ export default function CarSkeleton() {
                     <div className="w-full h-12 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse" />
                 </div>
 
-                {/* ID Skeleton */}
                 <div className="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
             </motion.div>
         </div>

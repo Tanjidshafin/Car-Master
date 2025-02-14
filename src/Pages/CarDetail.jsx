@@ -23,7 +23,6 @@ export default function CarDetails() {
             return res.data
         },
     })
-
     return (
         <main className="min-h-screen bg-white dark:bg-gray-900">
             <div className="relative h-[300px] w-full">
@@ -93,7 +92,7 @@ export default function CarDetails() {
                                         {selectedImage + 1}/{car.images.length}
                                     </div>
                                 </div>
-                                <div className={`grid grid-cols-${car.images.length} gap-2`}>
+                                <div className={`grid grid-cols-4 gap-2`}>
                                     {car.images.map((img, i) => (
                                         <motion.button
                                             key={i}
@@ -178,7 +177,7 @@ export default function CarDetails() {
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-sm text-gray-600 dark:text-gray-400">Status</div>
-                                    <div className="font-medium text-gray-900 dark:text-white">{car.status}</div>
+                                    <div className="font-medium uppercase text-gray-900 dark:text-white">{car.status}</div>
                                 </div>
                             </div>
 
