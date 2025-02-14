@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ChevronDown, ChevronUp } from "lucide-react"
 
-const FiltersSidebar = ({ isOpen, onClose, brand, onFilter, initialFilters }) => {
+const FiltersSidebar = ({ isOpen, onClose, brand, color, onFilter, initialFilters }) => {
   const [expandedSection, setExpandedSection] = useState(null)
   const [filters, setFilters] = useState(initialFilters)
 
@@ -97,12 +97,11 @@ const FiltersSidebar = ({ isOpen, onClose, brand, onFilter, initialFilters }) =>
       title: "Color",
       content: (
         <div className="mt-2 flex flex-wrap gap-2">
-          {["red", "blue", "green", "yellow", "black", "white"].map((color) => (
+          {color.map((color) => (
             <button
               key={color}
-              className={`w-8 h-8 rounded-full border-2 ${
-                filters.color.includes(color) ? "border-blue-500" : "border-gray-300 dark:border-gray-600"
-              } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300`}
+              className={`w-8 h-8 rounded-full border-2 ${filters.color.includes(color) ? "border-blue-500" : "border-gray-300 dark:border-gray-600"
+                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300`}
               style={{ backgroundColor: color }}
               onClick={() => {
                 const newColors = filters.color.includes(color)

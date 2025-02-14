@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useInView } from "framer-motion"
 import UseCars from "../Hooks/UseCars"
 import loading from "../assets/loading.json"
 import Lottie from "lottie-react"
+import { NavLink } from "react-router"
 export default function Recommended() {
     const [Allcars, refetch, isFetching] = UseCars()
     const cars = Allcars.filter(car => car.status === "recommended")
@@ -107,11 +108,13 @@ export default function Recommended() {
                                     transition={{ duration: 0.8 }}
                                     onClick={() => (offset === -1 ? prevCar() : offset === 1 ? nextCar() : null)}
                                 >
+
                                     <img
                                         src={cars[index].image || "/placeholder.svg"}
                                         alt={cars[index].name}
                                         className="w-full h-auto rounded-lg"
                                     />
+
                                 </motion.div>
                             )
                         })}

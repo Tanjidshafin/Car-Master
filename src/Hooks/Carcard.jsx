@@ -4,6 +4,7 @@ import { Heart, Share2, Star, ArrowRight } from "lucide-react"
 import { IoIosSpeedometer } from "react-icons/io";
 import { TbTransitionBottomFilled } from "react-icons/tb";
 import { IoIosColorPalette } from "react-icons/io";
+import { NavLink } from "react-router";
 const CarCard = ({ car }) => {
   return (
     <motion.div
@@ -51,11 +52,11 @@ const CarCard = ({ car }) => {
           </motion.div>
 
           <div className="absolute top-4 left-4 flex gap-2">
-            {car.status === "recommended" && (
-              <span className="px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full shadow-lg">
-                Featured
+            {
+              <span className="px-3 py-1 bg-blue-500 text-white uppercase text-xs font-semibold rounded-full shadow-lg">
+                {car.status}
               </span>
-            )}
+            }
             <span className="px-3 py-1  bg-white/20 backdrop-blur-sm text-gray-800 dark:text-white text-xs font-semibold rounded-full shadow-lg">
               {car.specs.year}
             </span>
@@ -89,14 +90,16 @@ const CarCard = ({ car }) => {
 
           <div className="flex items-center justify-between">
             <span className="text-3xl font-bold text-blue-500">${car.price.toLocaleString()}</span>
-            <motion.button
-              className="px-4 py-2 bg-blue-500 text-white rounded-full font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              View Details
-              <ArrowRight className="w-4 h-4" />
-            </motion.button>
+            <NavLink to={`/car/${car._id}`}>
+              <motion.button
+                className="px-4 py-2 bg-blue-500 text-white rounded-full font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                View Details
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            </NavLink>
           </div>
         </div>
 

@@ -17,7 +17,6 @@ export default function Navbar() {
         { name: "Home", path: "/" },
         { name: "All Cars", path: "/all-cars" },
     ]
-
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme") || "light"
         setIsDark(savedTheme === "dark")
@@ -118,7 +117,7 @@ export default function Navbar() {
                             <div className="hidden md:flex items-center space-x-4">
                                 <motion.button
                                     onClick={toggleTheme}
-                                    className={`p-2 rounded-full bg-gray-200 dark:bg-gray-800 transition-colors ${isScrolled ? "text-gray-900 dark:text-white" : "text-white bg-gray-800"
+                                    className={`p-2 rounded-full bg-gray-200 dark:bg-gray-800  transition-colors ${isScrolled ? "text-gray-900 dark:text-white" : ""
                                         }`}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}

@@ -22,6 +22,7 @@ const Allcars = () => {
   const dropdownRef = useRef(null)
   const categories = ["All", "Used", "New"]
   const brands = [...new Set(Allcars.map((item) => item.brand))]
+  const color = [...new Set(Allcars.map(item => item.specs.color))]
   const [currentPage, setCurrentPage] = useState(1)
   const [carsPerPage] = useState(6)
 
@@ -109,7 +110,7 @@ const Allcars = () => {
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters)
-    setCurrentPage(1) // Reset to first page when filters change
+    setCurrentPage(1)
   }
 
   const Pagination = ({ carsPerPage, totalCars, paginate, currentPage }) => {
@@ -139,11 +140,10 @@ const Allcars = () => {
                   <button
                     key={number}
                     onClick={() => paginate(number)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold transition-all duration-300 ${
-                      currentPage === number
-                        ? "bg-gradient-to-r from-blue-500 via-blue-500 to-blue-500 text-white scale-110 shadow-md"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold transition-all duration-300 ${currentPage === number
+                      ? "bg-gradient-to-r from-blue-500 via-blue-500 to-blue-500 text-white scale-110 shadow-md"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
                   >
                     {number}
                   </button>
@@ -180,40 +180,40 @@ const Allcars = () => {
             </div>
           </motion.div>
           <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-full shadow-md">
-                <button
-                  onClick={() => setIsGridView(true)}
-                  className={`p-2 rounded-full transition-all duration-300 ${
-                    isGridView
+            <div className="flex items-center justify-center flex-wrap gap-4">
+              <div className="flex gap-2">
+                <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-full shadow-md">
+                  <button
+                    onClick={() => setIsGridView(true)}
+                    className={`p-2 rounded-full transition-all duration-300 ${isGridView
                       ? "bg-blue-500 text-white shadow-lg"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  <Grid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setIsGridView(false)}
-                  className={`p-2 rounded-full transition-all duration-300 ${
-                    !isGridView
+                      }`}
+                  >
+                    <Grid className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setIsGridView(false)}
+                    className={`p-2 rounded-full transition-all duration-300 ${!isGridView
                       ? "bg-blue-500 text-white shadow-lg"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
+                      }`}
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                </div>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-full shadow-md border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <List className="w-5 h-5" />
-                </button>
+                  <option value="default">Sort by (Default)</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="year-desc">Year: Newest</option>
+                  <option value="year-asc">Year: Oldest</option>
+                </select>
               </div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-full shadow-md border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="default">Sort by (Default)</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="year-desc">Year: Newest</option>
-                <option value="year-asc">Year: Oldest</option>
-              </select>
 
               <button
                 onClick={() => setIsFilterOpen(true)}
@@ -262,8 +262,9 @@ const Allcars = () => {
             <motion.div variants={itemVariants} className="hidden md:block w-64 shrink-0">
               <FiltersSidebar
                 brand={brands}
+                color={color}
                 isOpen={true}
-                onClose={() => {}}
+                onClose={() => { }}
                 onFilter={handleFilterChange}
                 initialFilters={filters}
               />
@@ -275,15 +276,15 @@ const Allcars = () => {
                     <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
                       {isFetching
                         ? Array.from({ length: 6 }).map((_, i) => (
-                            <motion.div key={i} variants={itemVariants}>
-                              <CarCardSkeleton />
-                            </motion.div>
-                          ))
+                          <motion.div key={i} variants={itemVariants}>
+                            <CarCardSkeleton />
+                          </motion.div>
+                        ))
                         : currentCars.map((car) => (
-                            <motion.div key={car._id} variants={itemVariants}>
-                              <CarCard car={car} />
-                            </motion.div>
-                          ))}
+                          <motion.div key={car._id} variants={itemVariants}>
+                            <CarCard car={car} />
+                          </motion.div>
+                        ))}
                     </div>
                   ) : (
                     <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -316,105 +317,102 @@ const Allcars = () => {
                         <tbody>
                           {isFetching
                             ? Array.from({ length: 6 }).map((_, i) => (
-                                <tr key={i} className="animate-pulse">
-                                  <td colSpan="7" className="p-3">
-                                    <div className="h-16 bg-gray-200 dark:bg-gray-600 rounded"></div>
-                                  </td>
-                                </tr>
-                              ))
+                              <tr key={i} className="animate-pulse">
+                                <td colSpan="7" className="p-3">
+                                  <div className="h-16 bg-gray-200 dark:bg-gray-600 rounded"></div>
+                                </td>
+                              </tr>
+                            ))
                             : currentCars.map((car) => (
-                                <React.Fragment key={car._id}>
-                                  <motion.tr
-                                    variants={itemVariants}
-                                    className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                  >
-                                    <td className="p-3">
-                                      <img
-                                        src={car.image || "/placeholder.svg"}
-                                        alt={car.name}
-                                        width={80}
-                                        height={60}
-                                        className="object-cover rounded-md"
-                                      />
-                                    </td>
-                                    <td className="p-3 font-medium">{car.name}</td>
-                                    <td className="p-3">{car.brand}</td>
-                                    <td className="p-3 font-semibold">${car.price.toLocaleString()}</td>
-                                    <td className="p-3">
-                                      <div className="flex items-center">
-                                        {Array.from({ length: 5 }).map((_, index) => (
-                                          <Star
-                                            key={index}
-                                            className={`w-4 h-4 ${
-                                              index < car.rating ? "text-yellow-400 fill-current" : "text-gray-300"
+                              <React.Fragment key={car._id}>
+                                <motion.tr
+                                  variants={itemVariants}
+                                  className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  <td className="p-3">
+                                    <img
+                                      src={car.image || "/placeholder.svg"}
+                                      alt={car.name}
+                                      width={80}
+                                      height={60}
+                                      className="object-cover rounded-md"
+                                    />
+                                  </td>
+                                  <td className="p-3 font-medium">{car.name}</td>
+                                  <td className="p-3">{car.brand}</td>
+                                  <td className="p-3 font-semibold">${car.price.toLocaleString()}</td>
+                                  <td className="p-3">
+                                    <div className="flex items-center">
+                                      {Array.from({ length: 5 }).map((_, index) => (
+                                        <Star
+                                          key={index}
+                                          className={`w-4 h-4 ${index < car.rating ? "text-yellow-400 fill-current" : "text-gray-300"
                                             }`}
-                                          />
-                                        ))}
-                                      </div>
-                                    </td>
-                                    <td className="p-3">
-                                      <span
-                                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                          car.status === "recommended"
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-blue-100 text-blue-800"
-                                        }`}
-                                      >
-                                        {car.status}
-                                      </span>
-                                    </td>
-                                    <td className="p-3">
-                                      <button
-                                        onClick={() => toggleRowExpansion(car._id)}
-                                        className="text-blue-500 hover:text-blue-600 transition-colors focus:outline-none"
-                                      >
-                                        <ChevronRight
-                                          className={`w-5 h-5 transition-transform duration-300 ${
-                                            expandedRow === car._id ? "rotate-90" : ""
-                                          }`}
                                         />
-                                      </button>
-                                    </td>
-                                  </motion.tr>
-                                  <AnimatePresence>
-                                    {expandedRow === car._id && (
-                                      <motion.tr
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: "auto" }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="bg-gray-50 dark:bg-gray-800"
-                                      >
-                                        <td colSpan="7" className="p-4">
-                                          <motion.div
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            transition={{ duration: 0.3, delay: 0.1 }}
-                                            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                                          >
-                                            <div>
-                                              <h3 className="font-semibold mb-2">Description</h3>
-                                              <p>{car.description}</p>
-                                            </div>
-                                            <div>
-                                              <h3 className="font-semibold mb-2">Specifications</h3>
-                                              <ul className="space-y-1">
-                                                {Object.entries(car.specs).map(([key, value]) => (
-                                                  <li key={key} className="flex justify-between">
-                                                    <span className="font-medium">{key}:</span>
-                                                    <span>{value}</span>
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            </div>
-                                          </motion.div>
-                                        </td>
-                                      </motion.tr>
-                                    )}
-                                  </AnimatePresence>
-                                </React.Fragment>
-                              ))}
+                                      ))}
+                                    </div>
+                                  </td>
+                                  <td className="p-3">
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs font-semibold ${car.status === "recommended"
+                                        ? "bg-green-100 text-green-800"
+                                        : "bg-blue-100 text-blue-800"
+                                        }`}
+                                    >
+                                      {car.status}
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <button
+                                      onClick={() => toggleRowExpansion(car._id)}
+                                      className="text-blue-500 hover:text-blue-600 transition-colors focus:outline-none"
+                                    >
+                                      <ChevronRight
+                                        className={`w-5 h-5 transition-transform duration-300 ${expandedRow === car._id ? "rotate-90" : ""
+                                          }`}
+                                      />
+                                    </button>
+                                  </td>
+                                </motion.tr>
+                                <AnimatePresence>
+                                  {expandedRow === car._id && (
+                                    <motion.tr
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.3 }}
+                                      className="bg-gray-50 dark:bg-gray-800"
+                                    >
+                                      <td colSpan="7" className="p-4">
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          transition={{ duration: 0.3, delay: 0.1 }}
+                                          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                        >
+                                          <div>
+                                            <h3 className="font-semibold mb-2">Description</h3>
+                                            <p>{car.description}</p>
+                                          </div>
+                                          <div>
+                                            <h3 className="font-semibold mb-2">Specifications</h3>
+                                            <ul className="space-y-1">
+                                              {Object.entries(car.specs).map(([key, value]) => (
+                                                <li key={key} className="flex justify-between">
+                                                  <span className="font-medium">{key}:</span>
+                                                  <span>{value}</span>
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        </motion.div>
+                                      </td>
+                                    </motion.tr>
+                                  )}
+                                </AnimatePresence>
+                              </React.Fragment>
+                            ))}
                         </tbody>
                       </table>
                     </div>
@@ -437,6 +435,7 @@ const Allcars = () => {
       <div className="block sm:hidden">
         <FiltersSidebar
           brand={brands}
+          color={color}
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
           onFilter={(newFilters) => {
