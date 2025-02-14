@@ -127,8 +127,8 @@ export default function Navbar() {
                                         <NavLink
                                             to={`${item.path}`}
                                             className={({ isActive }) =>
-                                                `before:bg-blue-500 before:h-[2px] before:transition-all before:duration-300 before:absolute relative before:rounded-full before:bottom-[-2px] transition-all duration-300 before:left-0 cursor-pointer capitalize ${isActive ? "before:w-full text-blue-500" : "before:w-0 hover:before:w-full"
-                                                } ${isScrolled ? "text-gray-900 dark:text-white" : "text-white hover:text-blue-500"}`
+                                                `before:bg-blue-500 before:h-[2px] before:transition-all before:duration-300 before:absolute relative before:rounded-full before:bottom-[-2px] transition-all duration-300 before:left-0 cursor-pointer capitalize ${isActive ? "before:w-full font-semibold text-blue-500" : "before:w-0 hover:before:w-full"
+                                                } ${isScrolled ? "text-gray-900 dark:text-white" : "text-white"}`
                                             }
                                         >
                                             <span>{item.name}</span>
@@ -140,7 +140,7 @@ export default function Navbar() {
                             <div className="flex items-center space-x-4">
                                 <motion.button
                                     onClick={toggleTheme}
-                                    className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${isDark ? "bg-gray-800" : "bg-yellow-400"
+                                    className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${isDark ? "bg-gray-800" : "bg-yellow-400"
                                         }`}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.95 }}
@@ -177,7 +177,7 @@ export default function Navbar() {
                                 <motion.div className="relative" initial="initial" animate="animate" variants={favoriteIconVariants}>
                                     <NavLink
                                         to="/favorites"
-                                        className="relative inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                        className="relative inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                                             <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
@@ -196,7 +196,7 @@ export default function Navbar() {
                                     <motion.div className="relative">
                                         <motion.button
                                             onClick={() => setShowLoginDropdown(!showLoginDropdown)}
-                                            className="px-6 py-2 rounded-full bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 transition-colors"
                                             variants={buttonVariants}
                                             whileHover="hover"
                                             whileTap="tap"
@@ -261,7 +261,7 @@ export default function Navbar() {
                                     <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
                                         <NavLink
                                             to="/register"
-                                            className="px-6 py-2 rounded-full bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 transition-colors"
                                         >
                                             Register
                                         </NavLink>
@@ -270,7 +270,7 @@ export default function Navbar() {
                                     <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
                                         <NavLink
                                             to="/add-listing"
-                                            className="px-6 py-2 rounded-full bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 transition-colors"
                                         >
                                             Add Listing
                                         </NavLink>
@@ -313,7 +313,14 @@ export default function Navbar() {
                                             <motion.div key={item.name} variants={linkVariants} whileHover="hover">
                                                 <NavLink
                                                     to={item.path}
-                                                    className="block px-3 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
+                                                    className={({ isActive }) =>
+                                                        `block px-3 py-2 rounded-md transition-colors
+                                                        ${isActive
+                                                            ? "bg-blue-500 text-white font-semibold dark:bg-blue-600"
+                                                            : "text-gray-800 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900"
+                                                        } 
+                                                        ${isScrolled ? "text-gray-900 dark:text-white" : "text-gray-800 dark:text-gray-200"}`
+                                                    }
                                                 >
                                                     {item.name}
                                                 </NavLink>
@@ -329,7 +336,7 @@ export default function Navbar() {
                                             </motion.div>
                                             <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
                                                 <NavLink
-                                                    href="/register"
+                                                    to="/register"
                                                     className="block px-3 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
                                                 >
                                                     Register
