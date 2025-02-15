@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-import { Heart, Share2, Star, ArrowRight } from "lucide-react"
+import { Heart, Star, ArrowRight } from "lucide-react"
 import { IoIosSpeedometer } from "react-icons/io";
 import { TbTransitionBottomFilled } from "react-icons/tb";
 import { IoIosColorPalette } from "react-icons/io";
@@ -41,13 +41,6 @@ const CarCard = ({ car }) => {
               whileTap={{ scale: 0.95 }}
             >
               <Heart className="w-5 h-5 text-white" />
-            </motion.button>
-            <motion.button
-              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Share2 className="w-5 h-5 text-white" />
             </motion.button>
           </motion.div>
 

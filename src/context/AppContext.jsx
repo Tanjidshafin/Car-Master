@@ -63,7 +63,7 @@ const AppContextProvider = (props) => {
     };
 
 
-    const value = { handleRegister, user, handleLogin }
+    const value = { handleRegister, user, handleLogin, loading, setUser }
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 }
 export default AppContextProvider;

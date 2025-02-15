@@ -8,9 +8,13 @@ import axios from "axios"
 import logo from "../assets/logo.png"
 import swal from "sweetalert";
 import { AppContext } from "../context/AppContext";
+import { NavLink, useLocation, useNavigate } from "react-router";
 const Register = () => {
     const { handleRegister } = useContext(AppContext)
     const [loading, setLoading] = useState(false)
+    const location = useLocation()
+    const navigate = useNavigate()
+    const from = location?.state || "/"
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -55,7 +59,7 @@ const Register = () => {
             try {
                 const response = await axios.post("https://api.imgbb.com/1/upload", imgData, {
                     params: {
-                        key: "99529ffa59ce8d4ba3f6fe5adb904935",
+                        key: `${import.meta.env.VITE_IMGBB_API}`,
                     },
                 })
                 setFormData((prev) => ({
@@ -97,6 +101,7 @@ const Register = () => {
             });
         } finally {
             setLoading(false)
+            navigate(from)
         }
     }
 
@@ -346,13 +351,13 @@ const Register = () => {
                                 type="submit"
                                 className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors duration-700 transform hover:scale-105"
                             >
-                                Create an account
+                                {loading ? (<span className="loading loading-spinner loading-sm"></span>) : ""}   {loading ? "Creating" : "Create Account"}
                             </button>
                             <p className="text-gray-600 dark:text-gray-400 text-sm text-center">
                                 Already have an account?{" "}
-                                <a href="/login" className="text-blue-500 hover:text-blue-400 transition-colors duration-300">
+                                <NavLink to="/login" className="text-blue-500 hover:text-blue-400 transition-colors duration-300">
                                     Log in
-                                </a>
+                                </NavLink>
                             </p>
                         </motion.div>
                     </form>

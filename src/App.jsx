@@ -8,6 +8,8 @@ import Footer from "./Components/Footer"
 import Errora from "./Components/Errora"
 import { useContext } from "react"
 import { AppContext } from "./context/AppContext"
+import MyProfile from "./Components/MyProfile"
+import Private from "./context/Private"
 
 
 
@@ -22,6 +24,9 @@ function App() {
         <Route path="/all-cars" element={<Allcars />} />
         <Route path="/car/:id" element={<CarDetails />} />
         {!user && <Route path="/register" element={<Register />} />}
+        {user && <Route path="/profile" element={<Private>
+          <MyProfile />
+        </Private>} />}
         <Route path="*" element={<Errora />} />
       </Routes>
       <Footer />

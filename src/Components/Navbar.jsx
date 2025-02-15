@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useContext } from "react"
-import { NavLink, useLocation } from "react-router"
+import { NavLink, useLocation, useNavigate } from "react-router"
 import { motion, AnimatePresence } from "framer-motion"
 import logo from "../assets/logo.png"
 import { AppContext } from "../context/AppContext"
@@ -26,6 +26,7 @@ export default function Navbar() {
     const [loading, setLoading] = useState(false)
     const [isDark, setIsDark] = useState(false)
     const locations = useLocation()
+    const navigate = useNavigate()
     useEffect(() => {
         setIsMobileMenuOpen(false)
         setShowLoginDropdown(false)
@@ -113,6 +114,7 @@ export default function Navbar() {
             setShowLoginDropdown(false)
             setShowMobileLogin(false)
             setIsMobileMenuOpen(false)
+            locations.pathname === "/register" ? navigate("/") : ""
         }
     }
     return (
@@ -355,6 +357,7 @@ export default function Navbar() {
                                                             signOut(auth)
                                                             setShowLoginDropdown(false)
                                                             setShowMobileLogin(false)
+                                                            navigate("/")
                                                         }
                                                     });
                                             }}
@@ -466,6 +469,7 @@ export default function Navbar() {
                                                                     setShowLoginDropdown(false)
                                                                     setShowMobileLogin(false)
                                                                     setIsMobileMenuOpen(false)
+                                                                    navigate("/")
                                                                 });
                                                         }}
                                                         className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
