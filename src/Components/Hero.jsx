@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { NavLink } from "react-router"
 
 const slides = [
     {
@@ -40,7 +41,7 @@ export default function Hero() {
     }, [nextSlide])
 
     return (
-        <div className="relative md:h-screen h-[50rem] overflow-hidden">
+        <div className="relative h-screen overflow-hidden">
             <AnimatePresence initial={false}>
                 {slides.map(
                     (slide, index) =>
@@ -78,17 +79,19 @@ export default function Hero() {
                                             >
                                                 {slide.subtitle}
                                             </motion.h1>
-                                            <motion.button
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.6, duration: 0.5 }}
-                                                className="bg-blue-600 text-white px-8 py-3 rounded-md text-lg 
+                                            <NavLink to="/all-cars">
+                                                <motion.button
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.6, duration: 0.5 }}
+                                                    className="bg-blue-600 text-white px-8 py-3 rounded-md text-lg 
                                             hover:bg-blue-500 transition-colors"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                View Inventory
-                                            </motion.button>
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
+                                                    View All Cars
+                                                </motion.button>
+                                            </NavLink>
                                         </div>
                                     </div>
                                 </div>

@@ -25,7 +25,7 @@ export default function AllCarsBanner() {
     }, [])
 
     return (
-        <div className="relative md:h-screen h-[50rem] w-full overflow-hidden">
+        <div className="relative h-screen w-full overflow-hidden">
             <div className="absolute inset-0">
                 <img
                     src="https://sjc.microlink.io/VG6FqA2iRqLF93Xx33S-0M6Xoyt1sYy3pmBRVp3DnESrqW0cN1a-jWP5FF9U8cB6qhJPCt48tIKxXmpt38mlYA.jpeg"

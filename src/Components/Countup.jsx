@@ -4,8 +4,12 @@ import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 import CountUp from "react-countup"
 import { ArrowRight } from "lucide-react"
+import { useContext } from "react"
+import { AppContext } from "../context/AppContext"
+import { NavLink } from "react-router"
 
 export default function Countup() {
+    const { user } = useContext(AppContext)
     const [statsRef, inView] = useInView({
         triggerOnce: true,
         threshold: 0.1,
@@ -36,9 +40,9 @@ export default function Countup() {
                         className="space-y-6"
                     >
                         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-                            Get A Fair Price For Your Car
+                            Buy the Best Car
                             <br />
-                            Sell To Us Today
+                            Which Fits your Budget
                         </h1>
                         <p className="text-gray-600 dark:text-gray-300">
                             We are committed to providing our customers with exceptional service, competitive pricing, and a wide
@@ -62,10 +66,10 @@ export default function Countup() {
                                 </motion.li>
                             ))}
                         </ul>
-                        <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
-                            Get Started
+                        <NavLink to={user ? "/all-cars" : "/register"} className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                            {user ? "View Inventory" : "Get Started"}
                             <ArrowRight className="w-4 h-4" />
-                        </button>
+                        </NavLink>
                     </motion.div>
                 </div>
                 <motion.div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">

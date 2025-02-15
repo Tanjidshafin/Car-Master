@@ -6,9 +6,11 @@ import { UserCircle } from "lucide-react"
 import { Check } from 'lucide-react';
 import axios from "axios"
 import logo from "../assets/logo.png"
+import swal from "sweetalert";
 import { AppContext } from "../context/AppContext";
 const Register = () => {
     const { handleRegister } = useContext(AppContext)
+    const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -72,7 +74,7 @@ const Register = () => {
         setTimeout(() => setNotification(null), 5000)
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         if (formData.password !== formData.confirmPassword) {
             showNotification("Passwords do not match!", "error")
@@ -82,8 +84,20 @@ const Register = () => {
             showNotification("Read Terms & Conditions First!", "error")
             return
         }
-        handleRegister(formData.email, formData.password, formData.firstName + " " + formData.lastName, formData.userImage)
-        showNotification("Registration successful!", "success")
+        try {
+            setLoading(true)
+            await handleRegister(formData.email, formData.password, formData.firstName + " " + formData.lastName, formData.userImage)
+            showNotification("Registration successful!", "success")
+        } catch (error) {
+            swal({
+                title: "Getting Error!",
+                text: `${error}`,
+                icon: "error",
+                button: "Ok",
+            });
+        } finally {
+            setLoading(false)
+        }
     }
 
     const inputClasses =
@@ -98,7 +112,7 @@ const Register = () => {
                 initial={{ x: -100, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.6 }}
-                className="w-full md:w-1/2 relative overflow-hidden bg-gray-100 dark:bg-gray-900"
+                className="w-full md:w-2/3 relative overflow-hidden bg-gray-100 dark:bg-gray-900"
             >
                 <div
                     className="absolute inset-0 bg-cover bg-center"
@@ -136,7 +150,7 @@ const Register = () => {
                 initial={{ x: 100, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.6 }}
-                className="w-full md:w-1/2 bg-white dark:bg-gray-800 p-12 flex items-center"
+                className="w-full md:w-1/2 bg-gray-100 dark:bg-gray-800 p-12 flex items-center"
             >
                 <div className="w-full max-w-md mx-auto space-y-8">
                     <motion.div

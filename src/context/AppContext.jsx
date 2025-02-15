@@ -2,6 +2,7 @@ import { createContext, use, useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase.init";
+import swal from "sweetalert";
 export const AppContext = createContext();
 const AppContextProvider = (props) => {
     const locations = useLocation()
@@ -26,26 +27,43 @@ const AppContextProvider = (props) => {
     const handleRegister = (email, password, name, image) => {
         return createUserWithEmailAndPassword(auth, email, password)
             .then(res => {
-                return updateProfile(auth.currentUser, {
+                const newUser = res.user;
+                return updateProfile(newUser, {
                     displayName: name,
                     photoURL: image
                 }).then(() => {
-                    return () =>
-                        setUser(auth.currentUser)
+                    setUser({ ...newUser, displayName: name, photoURL: image });
+                    swal({
+                        title: "Welcome!",
+                        text: `Welcome ${name}!`,
+                        icon: "success",
+                        button: "Okay",
+                    });
+
+                    localStorage.setItem("user", JSON.stringify({ ...newUser, displayName: name, photoURL: image }));
+                    return newUser;
                 });
             })
     };
+
     const handleLogin = (email, password) => {
         return signInWithEmailAndPassword(auth, email, password)
             .then(res => {
                 const loggedInUser = res.user;
                 setUser(loggedInUser);
+                swal({
+                    title: "Welcome Back!",
+                    text: `Welcome Back ${loggedInUser.displayName || "User"}`,
+                    icon: "success",
+                    button: "Okay",
+                });
                 localStorage.setItem("user", JSON.stringify(loggedInUser));
                 return loggedInUser;
             })
-    }
+    };
 
-    const value = { handleRegister, user }
+
+    const value = { handleRegister, user, handleLogin }
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 }
 export default AppContextProvider;

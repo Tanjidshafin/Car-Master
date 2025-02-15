@@ -6,12 +6,12 @@ import { getAuth } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: 'AIzaSyDmgDZsjz-u_IdpaRpN5j7jr4CxMJm19-Y',
-  authDomain: 'car-master-8d44e.firebaseapp.com',
-  projectId: 'car-master-8d44e',
-  storageBucket: 'car-master-8d44e.firebasestorage.app',
-  messagingSenderId: '775129223478',
-  appId: '1:775129223478:web:94d3f03c19de11592d2397',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
