@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { NavLink, useLocation } from "react-router"
 import { motion, AnimatePresence } from "framer-motion"
 import logo from "../assets/logo.png"
+import { AppContext } from "../context/AppContext"
 
 const routes = [
     { name: "Home", path: "/" },
@@ -11,6 +12,7 @@ const routes = [
 ]
 
 export default function Navbar() {
+    const { user } = useContext(AppContext)
     const [isScrolled, setIsScrolled] = useState(false)
     const [lastScrollY, setLastScrollY] = useState(0)
     const [isVisible, setIsVisible] = useState(true)

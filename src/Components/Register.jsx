@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { UserCircle } from "lucide-react"
 import { Check } from 'lucide-react';
 import axios from "axios"
 import logo from "../assets/logo.png"
+import { AppContext } from "../context/AppContext";
 const Register = () => {
+    const { handleRegister } = useContext(AppContext)
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -80,6 +82,7 @@ const Register = () => {
             showNotification("Read Terms & Conditions First!", "error")
             return
         }
+        handleRegister(formData.email, formData.password, formData.firstName + " " + formData.lastName, formData.userImage)
         showNotification("Registration successful!", "success")
     }
 
