@@ -8,6 +8,8 @@ import { AppContext } from "../context/AppContext"
 import swal from 'sweetalert';
 import { signOut } from "firebase/auth"
 import { auth } from "../../firebase.init"
+import { Heart, PlusCircle, User } from "lucide-react"
+import UseLiked from "../Hooks/UseLiked"
 
 const routes = [
     { name: "Home", path: "/" },
@@ -15,10 +17,11 @@ const routes = [
 ]
 
 export default function Navbar() {
-    const { user, handleLogin } = useContext(AppContext)
+    const { user, handleLogin,favoriteCount } = useContext(AppContext)
     const [isScrolled, setIsScrolled] = useState(false)
     const [lastScrollY, setLastScrollY] = useState(0)
     const [isVisible, setIsVisible] = useState(true)
+    const [favCars] = UseLiked()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [showLoginDropdown, setShowLoginDropdown] = useState(false)
     const [showMobileLogin, setShowMobileLogin] = useState(false)
@@ -110,11 +113,11 @@ export default function Navbar() {
                 button: "Ok",
             });
         } finally {
+            locations.pathname === "/register" ? navigate("/") : ""
             setLoading(false)
             setShowLoginDropdown(false)
             setShowMobileLogin(false)
             setIsMobileMenuOpen(false)
-            locations.pathname === "/register" ? navigate("/") : ""
         }
     }
     return (
@@ -240,25 +243,33 @@ export default function Navbar() {
                                                         animate={{ opacity: 1, y: 0 }}
                                                         exit={{ opacity: 0, y: -10 }}
                                                         transition={{ duration: 0.2 }}
-                                                        className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2"
+                                                        className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3"
                                                     >
                                                         <NavLink
-                                                            to="/dashboard"
-                                                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-                                                        >
-                                                            Dashboard
-                                                        </NavLink>
-                                                        <NavLink
                                                             to="/favorites"
-                                                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
                                                         >
+                                                            <Heart className="w-5 h-5" />
                                                             My Favorites
+                                                            {favoriteCount > 0 && (
+                                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-green-500 rounded-full">
+                                                                    {favoriteCount}
+                                                                </span>
+                                                            )}
                                                         </NavLink>
                                                         <NavLink
                                                             to="/profile"
-                                                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                                         >
+                                                            <User className="w-5 h-5" />
                                                             My Profile
+                                                        </NavLink>
+                                                        <NavLink
+                                                            to="/add-listing"
+                                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                        >
+                                                            <PlusCircle className="w-5 h-5" />
+                                                            Add Listing
                                                         </NavLink>
                                                     </motion.div>
                                                 )}

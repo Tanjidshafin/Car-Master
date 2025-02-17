@@ -6,6 +6,7 @@ import SpecialOffers from '../Components/SpecialOffers'
 import Featured from '../Components/Featured'
 import Blogs from '../Components/Blogs'
 import WhatWeOffer from '../Components/WhatWeOffer'
+import Testimonials from '../Components/Testimonials'
 
 
 const Home = () => {
@@ -17,6 +18,7 @@ const Home = () => {
             <SpecialOffers />
             <WhyChooseUs />
             <Featured />
+            <Testimonials />
             <Blogs />
         </div>
     )

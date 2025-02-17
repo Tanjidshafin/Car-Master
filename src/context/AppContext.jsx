@@ -11,6 +11,7 @@ const AppContextProvider = (props) => {
         const users = JSON.parse(localStorage.getItem("user"))
         return users || null
     })
+    const [favoriteCount, setFavCount] = useState(null);
     useEffect(() => window.scrollTo(0, 0), [locations.pathname])
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, user => {
@@ -19,6 +20,7 @@ const AppContextProvider = (props) => {
                 localStorage.setItem("user", JSON.stringify(user));
             } else {
                 localStorage.removeItem("user");
+                setFavCount(null)
             }
             setLoading(false)
         })
@@ -63,7 +65,7 @@ const AppContextProvider = (props) => {
     };
 
 
-    const value = { handleRegister, user, handleLogin, loading, setUser }
+    const value = { handleRegister, user, handleLogin, loading, setUser, favoriteCount, setFavCount }
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 }
 export default AppContextProvider;

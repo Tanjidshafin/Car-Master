@@ -26,7 +26,6 @@ const Allcars = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [carsPerPage] = useState(6)
 
-  // New state for filters
   const [filters, setFilters] = useState({
     make: "All Makes",
     priceRange: [0, 250000],
@@ -34,6 +33,12 @@ const Allcars = () => {
     transmission: "All",
     color: [],
   })
+  useEffect(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight / 4,
+      behavior: "smooth",
+    });
+  }, [currentPage])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -51,6 +56,21 @@ const Allcars = () => {
   const toggleRowExpansion = (id) => {
     setExpandedRow(expandedRow === id ? null : id)
   }
+  const tableVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const rowVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -287,31 +307,25 @@ const Allcars = () => {
                         ))}
                     </div>
                   ) : (
-                    <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                      <table className="w-full border-collapse">
+                    <div className="overflow-x-auto rounded-lg shadow-lg bg-white dark:bg-gray-800">
+                      <motion.table className="w-full border-collapse" variants={tableVariants} initial="hidden" animate="visible">
                         <thead>
-                          <tr className="bg-gray-50 dark:bg-gray-700">
-                            <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                              Image
-                            </th>
-                            <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          <tr className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                            <th className="p-3 text-left text-xs font-medium uppercase tracking-wider">Image</th>
+                            <th className="p-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
                               Name
                             </th>
-                            <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th className="p-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">
                               Brand
                             </th>
-                            <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                              Price
-                            </th>
-                            <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th className="p-3 text-left text-xs font-medium uppercase tracking-wider">Price</th>
+                            <th className="p-3 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell">
                               Rating
                             </th>
-                            <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th className="p-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
                               Status
                             </th>
-                            <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                              Actions
-                            </th>
+                            <th className="p-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -326,37 +340,39 @@ const Allcars = () => {
                             : currentCars.map((car) => (
                               <React.Fragment key={car._id}>
                                 <motion.tr
-                                  variants={itemVariants}
-                                  className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                  variants={rowVariants}
+                                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                 >
                                   <td className="p-3">
                                     <img
                                       src={car.image || "/placeholder.svg"}
                                       alt={car.name}
-                                      width={80}
-                                      height={60}
-                                      className="object-cover rounded-md"
+                                      className="w-20 h-16 object-contain aspect-[9/14] rounded-md shadow-md duration-700 transform transition-transform hover:scale-110"
                                     />
+
                                   </td>
-                                  <td className="p-3 font-medium">{car.name}</td>
-                                  <td className="p-3">{car.brand}</td>
-                                  <td className="p-3 font-semibold">${car.price.toLocaleString()}</td>
-                                  <td className="p-3">
+                                  <td className="p-3 font-medium text-gray-800 dark:text-gray-200 hidden sm:table-cell">
+                                    {car.name}
+                                  </td>
+                                  <td className="p-3 hidden md:table-cell text-gray-600 dark:text-gray-400">{car.brand}</td>
+                                  <td className="p-3 font-semibold text-green-600 dark:text-green-400">
+                                    ${car.price.toLocaleString()}
+                                  </td>
+                                  <td className="p-3 hidden lg:table-cell">
                                     <div className="flex items-center">
                                       {Array.from({ length: 5 }).map((_, index) => (
                                         <Star
                                           key={index}
-                                          className={`w-4 h-4 ${index < car.rating ? "text-yellow-400 fill-current" : "text-gray-300"
-                                            }`}
+                                          className={`w-4 h-4 ${index < car.rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
                                         />
                                       ))}
                                     </div>
                                   </td>
-                                  <td className="p-3">
+                                  <td className="p-3 hidden sm:table-cell">
                                     <span
-                                      className={`px-2 py-1 rounded-full text-xs font-semibold ${car.status === "recommended"
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-blue-100 text-blue-800"
+                                      className={`px-2 py-1 rounded-full uppercase text-xs font-semibold ${car.status === "recommended"
+                                        ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                                        : "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100"
                                         }`}
                                     >
                                       {car.status}
@@ -367,10 +383,11 @@ const Allcars = () => {
                                       onClick={() => toggleRowExpansion(car._id)}
                                       className="text-blue-500 hover:text-blue-600 transition-colors focus:outline-none"
                                     >
-                                      <ChevronRight
-                                        className={`w-5 h-5 transition-transform duration-300 ${expandedRow === car._id ? "rotate-90" : ""
-                                          }`}
-                                      />
+                                      {expandedRow === car._id ? (
+                                        <ChevronDown className="w-5 h-5" />
+                                      ) : (
+                                        <ChevronRight className="w-5 h-5" />
+                                      )}
                                     </button>
                                   </td>
                                 </motion.tr>
@@ -391,20 +408,48 @@ const Allcars = () => {
                                           transition={{ duration: 0.3, delay: 0.1 }}
                                           className="grid grid-cols-1 md:grid-cols-2 gap-4"
                                         >
-                                          <div>
-                                            <h3 className="font-semibold mb-2">Description</h3>
-                                            <p>{car.description}</p>
+                                          <div className="sm:hidden mb-4">
+                                            <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-200">{car.name}</h3>
+                                            <p className="text-gray-600 dark:text-gray-400">{car.brand}</p>
                                           </div>
                                           <div>
-                                            <h3 className="font-semibold mb-2">Specifications</h3>
+                                            <h3 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">Description</h3>
+                                            <p className="text-gray-600 dark:text-gray-400">{car.description}</p>
+                                          </div>
+                                          <div>
+                                            <h3 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">
+                                              Specifications
+                                            </h3>
                                             <ul className="space-y-1">
                                               {Object.entries(car.specs).map(([key, value]) => (
-                                                <li key={key} className="flex justify-between">
+                                                <li key={key} className="flex justify-between text-gray-600 dark:text-gray-400">
                                                   <span className="font-medium">{key}:</span>
                                                   <span>{value}</span>
                                                 </li>
                                               ))}
                                             </ul>
+                                          </div>
+                                          <div className="sm:hidden">
+                                            <h3 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">Rating</h3>
+                                            <div className="flex items-center">
+                                              {Array.from({ length: 5 }).map((_, index) => (
+                                                <Star
+                                                  key={index}
+                                                  className={`w-5 h-5 ${index < car.rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+                                                />
+                                              ))}
+                                            </div>
+                                          </div>
+                                          <div className="sm:hidden">
+                                            <h3 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">Status</h3>
+                                            <span
+                                              className={`px-2 py-1 rounded-full text-xs font-semibold ${car.status === "recommended"
+                                                ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                                                : "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100"
+                                                }`}
+                                            >
+                                              {car.status}
+                                            </span>
                                           </div>
                                         </motion.div>
                                       </td>
@@ -414,7 +459,7 @@ const Allcars = () => {
                               </React.Fragment>
                             ))}
                         </tbody>
-                      </table>
+                      </motion.table>
                     </div>
                   )}
                   <Pagination
