@@ -19,26 +19,26 @@ const CarCard = ({ car }) => {
   const [isVisibleNoti, setNoti] = useState(false)
   const { _id, name, image, status, price, specs } = car
   const { condition, year, speed, transmission, color } = specs
-  const likedData = {
-    id: car._id,
-    email: user.email,
-    speed: car.specs.speed,
-    year: car.specs.year,
-    status: car.status,
-    rating: car.rating,
-    price: car.price,
-    image: car.image,
-    name: car.name,
-    model: car.model,
-    brand: car.brand
-  }
   const handleLiked = async () => {
     try {
       setLoading(true);
       if (!user) {
         setNoti(true);
-        setTimeout(() => setNoti(false), 10000);
+        setTimeout(() => setNoti(false), 5000);
       } else {
+        const likedData = {
+          id: car._id,
+          email: user.email,
+          speed: car.specs.speed,
+          year: car.specs.year,
+          status: car.status,
+          rating: car.rating,
+          price: car.price,
+          image: car.image,
+          name: car.name,
+          model: car.model,
+          brand: car.brand
+        }
         await link.post("/like-car", likedData);
         await refetch();
       }
@@ -84,11 +84,12 @@ const CarCard = ({ car }) => {
             >
               {loading || isFetching ? (
                 <span className="loading loading-spinner loading-xs"></span>
-              ) : user && likedCar.email === user.email && likedCar.id === car._id ? (
+              ) : user?.email && likedCar.email === user.email && likedCar.id === car._id ? (
                 <Heart className="w-5 h-5 text-white fill-current" />
               ) : (
                 <Heart onClick={handleLiked} className="w-5 h-5 cursor-pointer text-white" />
               )}
+
             </motion.button>
           </motion.div>
 

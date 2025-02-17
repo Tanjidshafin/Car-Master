@@ -10,7 +10,7 @@ import { signOut } from "firebase/auth"
 import { auth } from "../../firebase.init"
 import { Heart, PlusCircle, User } from "lucide-react"
 import UseLiked from "../Hooks/UseLiked"
-
+import { RxCross1 } from "react-icons/rx";
 const routes = [
     { name: "Home", path: "/" },
     { name: "All Cars", path: "/all-cars" },
@@ -511,80 +511,78 @@ export default function Navbar() {
                                 </motion.div>
                             )}
                         </AnimatePresence>
-
                         <AnimatePresence>
                             {showMobileLogin && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    className="fixed inset-0 backdrop-blur-lg z-50 flex items-center justify-center p-4"
-                                    onClick={() => setShowMobileLogin(false)}
+                                    transition={{ duration: 0.3 }}
+                                    className="w-full h-screen fixed top-0 left-0 z-[200000000] backdrop-blur-md flex items-center justify-center"
                                 >
                                     <motion.div
-                                        initial={{ scale: 0.9, opacity: 0 }}
+                                        initial={{ scale: 0, opacity: 0 }}
                                         animate={{ scale: 1, opacity: 1 }}
-                                        exit={{ scale: 0.9, opacity: 0 }}
-                                        className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-xl"
-                                        onClick={(e) => e.stopPropagation()}
+                                        exit={{ scale: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="w-[90%] sm:w-[80%] md:w-[35%] bg-white dark:bg-gray-800 rounded-lg mx-auto mt-8 shadow-xl"
                                     >
-                                        <div className="flex justify-between items-center mb-6">
-                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Login</h2>
-                                            <button
+                                        <div className="w-full flex items-end p-4 justify-between border-b border-gray-200 dark:border-gray-700">
+                                            <h1 className="text-[1.5rem] font-bold text-gray-800 dark:text-white">Login Form</h1>
+                                            <RxCross1
+                                                className="p-2 text-[2.5rem] hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-300 cursor-pointer text-gray-600 dark:text-gray-300"
                                                 onClick={() => setShowMobileLogin(false)}
-                                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-6 w-6"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
+                                            />
                                         </div>
-                                        <form onSubmit={handleSubmit} className="space-y-4">
+                                        <form className="flex flex-col gap-5 p-4" onSubmit={handleSubmit}>
                                             <div>
-                                                <label
-                                                    htmlFor="mobile-email"
-                                                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                                >
+                                                <label htmlFor="email" className="text-[1rem] font-[500] text-gray-700 dark:text-gray-300">
                                                     Email
                                                 </label>
                                                 <input
                                                     type="email"
-                                                    id="mobile-email"
                                                     name="email"
-                                                    className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    id="email"
+                                                    placeholder="abc@gmail.com"
+                                                    className="py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md w-full focus:outline-none mt-1 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                                                 />
                                             </div>
                                             <div>
-                                                <label
-                                                    htmlFor="mobile-password"
-                                                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                                >
+                                                <label htmlFor="password" className="text-[1rem] font-[500] text-gray-700 dark:text-gray-300">
                                                     Password
                                                 </label>
                                                 <input
                                                     type="password"
-                                                    id="mobile-password"
                                                     name="password"
-                                                    className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    id="password"
+                                                    placeholder="**********"
+                                                    className="py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md w-full focus:outline-none mt-1 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                                                 />
                                             </div>
-                                            <button
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-2">
+                                                    <input type="checkbox" name="checkbox" id="checkbox" className="w-[17px] h-[17px]" />
+                                                    <label htmlFor="checkbox" className="text-gray-600 dark:text-gray-300">
+                                                        Remember me
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <motion.button
                                                 type="submit"
-                                                className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                className="py-2 px-4 w-full bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300"
                                             >
-                                                {loading ? (<span className="loading loading-spinner loading-sm"></span>) : ""}      {loading ? "Signing In" : "Sign In"}
-                                            </button>
+                                                {loading ? (<span className="loading loading-spinner loading-xs"></span>) : ""}   {loading ? "Signing In..." : "Sign In"}
+                                            </motion.button>
                                         </form>
-                                        <div className="mt-4 text-center">
-                                            <NavLink to="/register" className="text-sm text-blue-500 hover:text-blue-600">
-                                                Don't have an account? Register
-                                            </NavLink>
+                                        <div className="flex items-center justify-center w-full pb-4">
+                                            <p className="text-[1rem] font-[400] text-gray-600 dark:text-gray-300">
+                                                Not have any account?{" "}
+                                                <NavLink to="/register" className="text-blue-500 underline hover:text-blue-600">
+                                                    Sign Up
+                                                </NavLink>
+                                            </p>
                                         </div>
                                     </motion.div>
                                 </motion.div>
