@@ -64,7 +64,7 @@ const TestimonialCard = ({ testimonial }) => {
                     filter: "brightness(0.3)",
                 }}
             ></div>
-            <div className="relative z-10 max-w-2xl mx-auto p-8 bg-black bg-opacity-50 rounded-lg text-white">
+            <div className="relative z-10  max-w-2xl mx-auto p-8 bg-black bg-opacity-50 rounded-lg text-white">
                 <div className="flex items-center mb-4">
                     <img
                         src={testimonial.image || "/placeholder.svg"}
@@ -101,7 +101,7 @@ const EachTestimonials = () => {
     return (
         <section ref={targetRef} className="relative h-[400vh]">
             <div className="sticky top-0 flex gap-10 overflow-hidden">
-                <motion.div style={{ x }} className="flex gap-10">
+                <motion.div style={{ x }} className="flex lg:gap-10">
                     {testimonials.map((testimonial) => (
                         <TestimonialCard key={testimonial.id} testimonial={testimonial} />
                     ))}

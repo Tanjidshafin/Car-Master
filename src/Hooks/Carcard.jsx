@@ -87,7 +87,7 @@ const CarCard = ({ car }) => {
               ) : user && likedCar.email === user.email && likedCar.id === car._id ? (
                 <Heart className="w-5 h-5 text-white fill-current" />
               ) : (
-                <Heart onClick={handleLiked} className="w-5 h-5 text-white" />
+                <Heart onClick={handleLiked} className="w-5 h-5 cursor-pointer text-white" />
               )}
             </motion.button>
           </motion.div>

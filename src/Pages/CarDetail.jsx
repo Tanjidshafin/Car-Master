@@ -99,7 +99,7 @@ export default function CarDetails() {
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setSelectedImage(i)}
-                                            className={`relative aspect-square rounded-lg overflow-hidden ${selectedImage === i ? "ring-2 ring-orange-500" : ""
+                                            className={`relative rounded-lg overflow-hidden ${selectedImage === i ? "ring-2 ring-orange-500" : ""
                                                 }`}
                                         >
                                             <img

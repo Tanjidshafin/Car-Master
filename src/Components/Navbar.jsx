@@ -17,7 +17,7 @@ const routes = [
 ]
 
 export default function Navbar() {
-    const { user, handleLogin,favoriteCount } = useContext(AppContext)
+    const { user, handleLogin, favoriteCount } = useContext(AppContext)
     const [isScrolled, setIsScrolled] = useState(false)
     const [lastScrollY, setLastScrollY] = useState(0)
     const [isVisible, setIsVisible] = useState(true)
@@ -40,7 +40,6 @@ export default function Navbar() {
             const savedTheme = localStorage.getItem("theme") || "light"
             setIsDark(savedTheme === "dark")
             document.documentElement.setAttribute("data-theme", savedTheme)
-
             const handleScroll = () => {
                 const currentScrollY = window.scrollY
                 if (currentScrollY > lastScrollY && !showLoginDropdown && !showProfileDropdown) {
@@ -56,7 +55,6 @@ export default function Navbar() {
 
                 setLastScrollY(currentScrollY)
             }
-
             window.addEventListener("scroll", handleScroll)
             return () => window.removeEventListener("scroll", handleScroll)
         }, [lastScrollY, showLoginDropdown, showProfileDropdown])
@@ -129,7 +127,7 @@ export default function Navbar() {
                     animate="visible"
                     exit="hidden"
                     transition={{ type: "spring", stiffness: 100 }}
-                    className={`fixed top-0 w-full z-[1000] ${isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "bg-transparent"}`}
+                    className={`fixed top-0 w-full z-[1000] ${isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "backdrop-blur-md"}`}
                 >
                     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center h-20">
