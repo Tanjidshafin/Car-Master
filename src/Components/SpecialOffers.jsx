@@ -3,191 +3,12 @@
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-
-const Allcars = [
-    {
-        id: 1,
-        brand: "Porsche",
-        model: "Cayenne",
-        name: "Porsche Cayenne",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/cayenman5.png",
-        price: 75000.0,
-        rating: 4,
-        status: "recommended",
-        description: "The Porsche Cayenne is a luxury midsize SUV offering powerful performance, premium interiors, and advanced technology features.",
-        specs: {
-            condition: "New",
-            year: "2023",
-            transmission: "Automatic",
-            color: "White",
-            speed: "165 mph",
-        },
-    },
-    {
-        id: 2,
-        brand: "Porsche",
-        model: "911",
-        name: "Porsche 911",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/porsche-one.png",
-        price: 92000.0,
-        rating: 5,
-        status: "specialOffer",
-        description: "The Porsche 911 is an iconic sports car known for its sleek design, exhilarating performance, and precision engineering.",
-        specs: {
-            condition: "New",
-            year: "2023",
-            transmission: "Manual",
-            color: "Blue",
-            speed: "190 mph",
-        },
-    },
-    {
-        id: 3,
-        brand: "Porsche",
-        model: "Panamera",
-        name: "Porsche Panamera",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/paramela1.png",
-        price: 67000.0,
-        rating: 4,
-        status: "recommended",
-        description: "The Porsche Panamera combines sports car performance with the comfort and luxury of a premium sedan, making it a unique offering in its class.",
-        specs: {
-            condition: "Used",
-            year: "2019",
-            transmission: "Automatic",
-            color: "Black",
-            speed: "155 mph",
-        },
-    },
-    {
-        id: 4,
-        brand: "Porsche",
-        model: "Macan",
-        name: "Porsche Macan",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/macan3.png",
-        price: 80000.0,
-        rating: 5,
-        status: "specialOffer",
-        description: "A compact luxury SUV that blends sporty performance with daily usability, offering a thrilling yet practical drive.",
-        specs: {
-            condition: "New",
-            year: "2023",
-            transmission: "Automatic",
-            color: "Red",
-            speed: "175 mph",
-        },
-    },
-    {
-        id: 5,
-        brand: "Jaguar",
-        model: "XE",
-        name: "Jaguar XE",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/xe1.png",
-        price: 73000.0,
-        rating: 4,
-        status: "recommended",
-        description: "A premium sports sedan that delivers a refined driving experience with powerful engine options and elegant styling.",
-        specs: {
-            condition: "New",
-            year: "2022",
-            transmission: "Manual",
-            color: "Silver",
-            speed: "160 mph",
-        },
-    },
-    {
-        id: 6,
-        brand: "Tesla",
-        model: "Model X",
-        name: "Tesla Model X",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/vehicle-two.png",
-        price: 85000.0,
-        rating: 5,
-        status: "specialOffer",
-        description: "A high-performance electric SUV offering cutting-edge technology, exceptional acceleration, and long-range capabilities.",
-        specs: {
-            condition: "Used",
-            year: "2021",
-            transmission: "Automatic",
-            color: "Gray",
-            speed: "170 mph",
-        },
-    },
-    {
-        id: 7,
-        brand: "Porsche",
-        model: "Macan GTS",
-        name: "Porsche Macan GTS",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/macan1.png",
-        price: 81000.0,
-        rating: 4,
-        status: "recommended",
-        description: "A performance-focused version of the Macan, featuring enhanced handling, a sportier design, and a thrilling drive experience.",
-        specs: {
-            condition: "New",
-            year: "2023",
-            transmission: "Automatic",
-            color: "Green",
-            speed: "180 mph",
-        },
-    },
-    {
-        id: 8,
-        brand: "Jaguar",
-        model: "XE SV Project 8",
-        name: "Jaguar XE SV Project 8",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/02/cayenne1.png",
-        price: 74000.0,
-        rating: 4,
-        status: "specialOffer",
-        description: "A track-ready version of the Jaguar XE with extreme performance upgrades and an aggressive design.",
-        specs: {
-            condition: "Used",
-            year: "2020",
-            transmission: "Manual",
-            color: "Yellow",
-            speed: "165 mph",
-        },
-    },
-    {
-        id: 9,
-        brand: "Porsche",
-        model: "Panamera Turbo",
-        name: "Porsche Panamera Turbo",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/PANAMERA1.png",
-        price: 110000.0,
-        rating: 5,
-        status: "recommended",
-        description: "A luxury high-performance sedan combining speed, technology, and comfort for an exhilarating drive.",
-        specs: {
-            condition: "New",
-            year: "2023",
-            transmission: "Automatic",
-            color: "Black",
-            speed: "196 mph",
-        },
-    },
-    {
-        id: 10,
-        brand: "Porsche",
-        model: "Taycan Turbo S",
-        name: "Porsche Taycan Turbo S",
-        image: "https://autopro.jwsuperthemes.com/wp-content/uploads/2017/01/car-1.png",
-        price: 150000.0,
-        rating: 5,
-        status: "specialOffer",
-        description: "Porsche's fully electric sports car, delivering breathtaking acceleration and cutting-edge electric technology.",
-        specs: {
-            condition: "New",
-            year: "2023",
-            transmission: "Automatic",
-            color: "White",
-            speed: "200 mph",
-        },
-    },
-];
+import UseCars from "../Hooks/UseCars"
 
 export default function SpecialOffers() {
+    const [apiCars] = UseCars({ page: 1, limit: 100 })
+    const offerCars = apiCars.filter((car) => (car?.status || "").toLowerCase() === "specialoffer")
+    const Allcars = offerCars.length > 0 ? offerCars : apiCars
     const [selectedCarIndex, setSelectedCarIndex] = useState(0)
     const [startIndex, setStartIndex] = useState(0)
     const carouselRef = useRef(null)
@@ -196,7 +17,20 @@ export default function SpecialOffers() {
         threshold: 0.1,
     })
 
+    useEffect(() => {
+        if (Allcars.length === 0) {
+            setSelectedCarIndex(0)
+            setStartIndex(0)
+            return
+        }
+        if (selectedCarIndex >= Allcars.length) {
+            setSelectedCarIndex(0)
+            setStartIndex(0)
+        }
+    }, [Allcars.length, selectedCarIndex])
+
     const moveCarousel = (direction) => {
+        if (Allcars.length === 0) return
         if (direction === "left") {
             setSelectedCarIndex((prevIndex) => (prevIndex - 1 + Allcars.length) % Allcars.length)
             if (selectedCarIndex === startIndex) {
@@ -211,6 +45,7 @@ export default function SpecialOffers() {
     }
 
     const selectCar = (index) => {
+        if (Allcars.length === 0) return
         setSelectedCarIndex(index)
     }
 
@@ -226,6 +61,7 @@ export default function SpecialOffers() {
 
     useEffect(() => {
         const handleResize = () => {
+            if (Allcars.length === 0) return
             const visibleAllcars = getVisibleAllcars()
             if (selectedCarIndex < startIndex || selectedCarIndex >= startIndex + visibleAllcars) {
                 setStartIndex(Math.max(0, Math.min(selectedCarIndex, Allcars.length - visibleAllcars)))
@@ -236,7 +72,11 @@ export default function SpecialOffers() {
         return () => window.removeEventListener("resize", handleResize)
     }, [selectedCarIndex, startIndex, getVisibleAllcars])
 
-    const visibleAllcars = getVisibleAllcars()
+    if (Allcars.length === 0) {
+        return null
+    }
+
+    const visibleAllcars = Math.min(getVisibleAllcars(), Allcars.length)
     const displayedAllcars = [...Array(visibleAllcars)].map((_, index) => Allcars[(startIndex + index) % Allcars.length])
 
     return (
@@ -293,7 +133,7 @@ export default function SpecialOffers() {
                             >
                                 {displayedAllcars.map((car, index) => (
                                     <motion.div
-                                        key={car.id}
+                                        key={car._id || car.id}
                                         className={`cursor-pointer flex-shrink-0`}
                                         onClick={() => selectCar((startIndex + index) % Allcars.length)}
                                         whileHover={{ scale: 1.05 }}
@@ -374,7 +214,7 @@ export default function SpecialOffers() {
                         </div>
                     </div>
                     <motion.div
-                        key={Allcars[selectedCarIndex].id}
+                        key={Allcars[selectedCarIndex]._id || Allcars[selectedCarIndex].id}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3 }}

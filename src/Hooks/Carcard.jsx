@@ -5,29 +5,51 @@ import { IoIosSpeedometer } from "react-icons/io"
 import { TbTransitionBottomFilled } from "react-icons/tb"
 import { IoIosColorPalette } from "react-icons/io"
 import { NavLink } from "react-router"
+import { useNavigate } from "react-router"
 import UseLiked from "./UseLiked"
 import { useContext, useState } from "react"
 import { AppContext } from "../context/AppContext"
 import BaseUrl from "./BaseUrl"
+import { useMutation } from "@tanstack/react-query"
+import { chatService } from "../services/chatService"
+import { connectSocket } from "../services/socket"
 
 const CarCard = ({ car }) => {
   const [favCars, refetch, isFetching] = UseLiked()
-  const likedCar = favCars.find((cars) => cars.id === car._id) || { liked: [] }
+  const likedCar = favCars.find((cars) => (cars.carId || cars.id) === car._id) || { liked: [] }
   const link = BaseUrl()
-  const { user, setFavCount } = useContext(AppContext)
+  const navigate = useNavigate()
+  const { user } = useContext(AppContext)
   const [loading, setLoading] = useState(false)
   const [isVisibleNoti, setNoti] = useState(false)
+  const [chattingId, setChattingId] = useState(null)
+  const [notificationMessage, setNotificationMessage] = useState("Oops! You are not logged in. Please log in to interact with this feature.")
   const { _id, name, image, status, price, specs } = car
   const { condition, year, speed, transmission, color } = specs
+  const seller = car.seller || null
+
+  const createConversation = useMutation({
+    mutationFn: chatService.createConversation,
+    onSuccess: (conversation) => {
+      navigate(`/messages?conversationId=${conversation._id}`)
+    },
+    onError: (error) => {
+      setNotificationMessage(error?.response?.data?.error || "Unable to start chat with this seller right now.")
+      setNoti(true)
+      setTimeout(() => setNoti(false), 5000)
+    },
+  })
+
   const handleLiked = async () => {
     try {
       setLoading(true);
       if (!user) {
+        setNotificationMessage("Oops! You are not logged in. Please log in to interact with this feature.")
         setNoti(true);
         setTimeout(() => setNoti(false), 5000);
       } else {
         const likedData = {
-          id: car._id,
+          carId: car._id,
           email: user.email,
           speed: car.specs.speed,
           year: car.specs.year,
@@ -48,6 +70,35 @@ const CarCard = ({ car }) => {
       setLoading(false);
     }
   };
+
+  const handleContactSeller = async () => {
+    if (!user?.email) {
+      setNotificationMessage("Oops! You are not logged in. Please log in to contact a seller.")
+      setNoti(true)
+      setTimeout(() => setNoti(false), 5000)
+      return
+    }
+    if (!seller?._id) {
+      setNotificationMessage("This car does not have an assigned seller yet.")
+      setNoti(true)
+      setTimeout(() => setNoti(false), 5000)
+      return
+    }
+    try {
+      setChattingId(seller._id)
+      connectSocket()
+      await createConversation.mutateAsync({
+        vendor_id: seller._id,
+        car_id: car._id
+      })
+
+    } catch (error) {
+      console.error("Failed to start conversation:", error)
+    } finally {
+      setChattingId(null)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -84,7 +135,7 @@ const CarCard = ({ car }) => {
             >
               {loading || isFetching ? (
                 <span className="loading loading-spinner loading-xs"></span>
-              ) : user?.email && likedCar.email === user.email && likedCar.id === car._id ? (
+              ) : user?.email && likedCar.email === user.email && (likedCar.carId || likedCar.id) === car._id ? (
                 <Heart className="w-5 h-5 text-white fill-current" />
               ) : (
                 <Heart onClick={handleLiked} className="w-5 h-5 cursor-pointer text-white" />
@@ -155,22 +206,31 @@ const CarCard = ({ car }) => {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white dark:border-gray-600">
               <img
-                src="/placeholder.svg?height=40&width=40"
-                alt="Seller Avatar"
+                src={seller?.photoURL || "/placeholder.svg?height=40&width=40"}
+                alt={seller?.displayName || "Seller Avatar"}
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
-              <span className="font-medium text-gray-900 dark:text-white block">Seller Name</span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Premium Seller</span>
+              <span className="font-medium text-gray-900 dark:text-white block">{seller?.displayName || "Unassigned seller"}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{seller?.location || seller?.email || "Seller information unavailable"}</span>
             </div>
           </div>
           <motion.button
-            className="text-blue-500 font-medium hover:underline"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center gap-2 text-blue-500 font-medium cursor-pointer hover:underline disabled:opacity-60"
+            whileHover={{ scale: chattingId === seller?._id ? 1 : 1.05 }}
+            whileTap={{ scale: chattingId === seller?._id ? 1 : 0.95 }}
+            onClick={handleContactSeller}
+            disabled={chattingId === seller?._id}
           >
-            Contact
+            {chattingId === seller?._id ? (
+              <>
+                Contacting...
+                <span className="h-3.5 w-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              </>
+            ) : (
+              "Contact"
+            )}
           </motion.button>
         </div>
       </motion.div>
@@ -199,7 +259,7 @@ const CarCard = ({ car }) => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  Oops! You are not logged in. Please log in to interact with this feature.
+                  {notificationMessage}
                 </motion.p>
               </div>
 

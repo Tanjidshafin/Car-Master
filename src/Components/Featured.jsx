@@ -7,7 +7,7 @@ import loading from "../assets/loading.json"
 import Lottie from "lottie-react"
 import { NavLink } from "react-router"
 export default function Recommended() {
-    const [Allcars, refetch, isFetching] = UseCars()
+    const [Allcars, refetch, isFetching] = UseCars({ page: 1, limit: 100 })
     const cars = Allcars.filter(car => car.status === "recommended")
     const [currentIndex, setCurrentIndex] = useState(0)
     const containerRef = useRef(null)

@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable react/prop-types */
 
 import { useContext } from "react"
 import { AppContext } from "./AppContext"
@@ -48,7 +49,7 @@ const Private = ({ children }) => {
         return children
     }
 
-    return <Navigate to={"/register"} state={location?.pathname} />
+    return <Navigate to="/login" state={{ from: location?.pathname }} replace />
 }
 
 export default Private

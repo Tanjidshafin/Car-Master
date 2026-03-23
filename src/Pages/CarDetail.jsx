@@ -2,27 +2,178 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Star, Phone, MessageCircle } from "lucide-react"
-import { NavLink, useParams } from "react-router"
-import { useQuery } from "@tanstack/react-query"
+import { Star, Phone, MessageCircle, MapPin, CalendarRange, ArrowRight } from "lucide-react"
+import { NavLink, useNavigate, useParams } from "react-router"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import BaseUrl from "../Hooks/BaseUrl"
 import CarSkeleton from "../Components/CarSkeleton"
+import BookingForm from "../Components/booking/BookingForm"
+import { chatService } from "../services/chatService"
+import { bookingService } from "../services/bookingService"
+import { useContext } from "react"
+import { AppContext } from "../context/AppContext"
+import { connectSocket } from "../services/socket"
+import { SurfaceCard } from "../Components/dashboard/PremiumShell"
 
 export default function CarDetails() {
     const [selectedImage, setSelectedImage] = useState(0)
+    const [showBookingForm, setShowBookingForm] = useState(false)
+    const [chattingId, setChattingId] = useState(null)
+    const [chatInfo, setChatInfo] = useState("")
     const { id } = useParams()
+    const { user } = useContext(AppContext)
+    const navigate = useNavigate()
     const link = BaseUrl()
     const {
-        data: car = [],
-        refetch,
+        data: car = {},
         isFetching,
     } = useQuery({
         queryKey: ["car"],
         queryFn: async () => {
             const res = await link.get(`/car/${id}`)
-            return res.data
+            return res.data.data
         },
     })
+    const galleryImages = Array.isArray(car.images) && car.images.length > 0 ? car.images : [car.image || "/placeholder.svg"]
+    const seller = car.seller || null
+
+    const createConversation = useMutation({
+        mutationFn: chatService.createConversation,
+        onSuccess: (conversation) => {
+            setChatInfo("Conversation ready. Opening messages...")
+            navigate(`/messages?conversationId=${conversation._id}`)
+        },
+        onError: (err) => setChatInfo(err?.response?.data?.error || "Failed to start chat"),
+    })
+
+    const createBooking = useMutation({
+        mutationFn: bookingService.createBooking,
+        onSuccess: () => {
+            setShowBookingForm(false)
+            setChatInfo("Test drive request sent. You can track it from My Bookings.")
+        },
+    })
+    const handleStartChat = async () => {
+        const sellerId = seller?._id
+        const carId = car?._id
+        if (!user?.email || !sellerId) {
+            setChatInfo("Please login and ensure seller info is available.")
+            return
+        }
+        if (chattingId === sellerId) return
+        try {
+            setChattingId(sellerId)
+            connectSocket()
+            await createConversation.mutateAsync({
+                vendor_id: sellerId,
+                car_id: carId
+            })
+        } catch (error) {
+            console.error("Failed to start chat:", error)
+        } finally {
+            setChattingId(null)
+        }
+    }
+
+    const SellerAndBookingSection = () => (
+        <div className="space-y-5">
+            <SurfaceCard className="space-y-4 rounded-[1.4rem] p-5 shadow-[0_14px_40px_rgba(148,163,184,0.12)] dark:shadow-[0_14px_40px_rgba(15,23,42,0.18)]">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-600/80 dark:text-sky-300/80">Seller information</p>
+                        <h3 className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{seller?.displayName || "Assigned vendor pending"}</h3>
+                        <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-600 dark:text-slate-300">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 dark:border-white/10 dark:bg-white/5">
+                                <MapPin className="h-4 w-4" />
+                                {seller?.location || car.location || "Location not added"}
+                            </span>
+                            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 dark:border-white/10 dark:bg-white/5">
+                                <Phone className="h-4 w-4" />
+                                {seller?.phone || car.contact || "Phone not provided"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[1.2rem] border border-slate-200 bg-slate-100 text-base font-semibold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-100">
+                        {seller?.photoURL ? (
+                            <img src={seller.photoURL} alt={seller.displayName || "Seller"} className="h-full w-full object-cover" />
+                        ) : (
+                            (seller?.displayName || seller?.email || "CM").slice(0, 2).toUpperCase()
+                        )}
+                    </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 transition hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10">
+                        <Phone className="h-5 w-5" />
+                        <span>{seller?.phone || car.contact || "Not Provided"}</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleStartChat}
+                        disabled={chattingId === seller?._id}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60 dark:border-sky-500 dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400"
+                    >
+                        {chattingId === seller?._id ? (
+                            <>
+                                <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin dark:border-slate-950 dark:border-t-transparent" />
+                                <span>Contacting...</span>
+                            </>
+                        ) : (
+                            <>
+                                <MessageCircle className="h-5 w-5" />
+                                <span>Contact Seller</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+                {seller?._id ? (
+                    <NavLink to={`/vendor/${seller._id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-sky-600 transition hover:text-sky-500 dark:text-sky-300 dark:hover:text-sky-200">
+                        Visit seller profile
+                        <ArrowRight className="h-4 w-4" />
+                    </NavLink>
+                ) : null}
+            </SurfaceCard>
+
+            <SurfaceCard className="space-y-4 rounded-[1.4rem] p-5 shadow-[0_14px_40px_rgba(148,163,184,0.12)] dark:shadow-[0_14px_40px_rgba(15,23,42,0.18)]">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-600/80 dark:text-sky-300/80">Booking options</p>
+                        <h3 className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">Book a test drive</h3>
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">Choose a date, send your request, and track the vendor response from your booking page.</p>
+                    </div>
+                    <NavLink to="/my-bookings" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10">
+                        <CalendarRange className="h-4 w-4" />
+                        My Bookings
+                    </NavLink>
+                </div>
+                <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/35">
+                    <div className="flex items-center gap-3">
+                        <div>
+                            <h4 className="font-semibold text-slate-900 dark:text-white">Book test drive</h4>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Choose a date and let the vendor confirm availability.</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setShowBookingForm((prev) => !prev)}
+                        className={`mt-4 w-full rounded-xl px-4 py-3 text-sm font-semibold transition ${showBookingForm
+                            ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10"
+                            : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400"
+                            }`}
+                    >
+                        {showBookingForm ? "Hide form" : "Open booking form"}
+                    </button>
+                </div>
+                {chatInfo ? <p className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700 dark:border-sky-400/20 dark:bg-sky-400/10 dark:text-sky-200">{chatInfo}</p> : null}
+                {showBookingForm ? (
+                    <BookingForm
+                        loading={createBooking.isPending}
+                        onSubmit={(form) => createBooking.mutate({ car_id: car._id, ...form })}
+                    />
+                ) : null}
+            </SurfaceCard>
+        </div>
+    )
+
     return (
         <main className="min-h-screen bg-white dark:bg-gray-900">
             <div className="relative h-[300px] w-full">
@@ -76,7 +227,7 @@ export default function CarDetails() {
                                     <AnimatePresence mode="wait">
                                         <motion.img
                                             key={selectedImage}
-                                            src={car.images[selectedImage]}
+                                            src={galleryImages[selectedImage]}
                                             alt={`${car.name} Image ${selectedImage + 1}`}
                                             className="w-full h-full object-cover"
                                             initial={{ opacity: 0 }}
@@ -89,11 +240,11 @@ export default function CarDetails() {
                                         <Star className="w-6 h-6 text-yellow-500" />
                                     </div>
                                     <div className="absolute bottom-4 right-4 text-white text-sm bg-black/50 px-2 py-1 rounded">
-                                        {selectedImage + 1}/{car.images.length}
+                                        {selectedImage + 1}/{galleryImages.length}
                                     </div>
                                 </div>
                                 <div className={`grid grid-cols-4 gap-2`}>
-                                    {car.images.map((img, i) => (
+                                    {galleryImages.map((img, i) => (
                                         <motion.button
                                             key={i}
                                             whileHover={{ scale: 1.05 }}
@@ -181,25 +332,10 @@ export default function CarDetails() {
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
-                                <div className="flex gap-3 flex-col sm:flex-row items-center">
-                                    <button className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg transition-colors">
-                                        <Phone className="w-5 h-5" />
-                                        <span>01234567890</span>
-                                    </button>
-                                    <button className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition-colors">
-                                        <MessageCircle className="w-5 h-5" />
-                                        <span>Chat via WhatsApp</span>
-                                    </button>
-                                </div>
-                                <button className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-lg transition-colors">
-                                    Send message
-                                </button>
-                            </div>
-
                             <div className="text-sm text-gray-600 dark:text-gray-400">
                                 {car.status === "SpecialOffer" && "Special Offer"} ID #{car._id?.slice(-6)}
                             </div>
+                            <SellerAndBookingSection />
                         </motion.div>
                     </div>
                 )}
@@ -207,4 +343,3 @@ export default function CarDetails() {
         </main>
     )
 }
-

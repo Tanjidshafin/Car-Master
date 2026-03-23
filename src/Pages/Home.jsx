@@ -18,7 +18,6 @@ const Home = () => {
             <SpecialOffers />
             <WhyChooseUs />
             <Featured />
-            <Testimonials />
             <Blogs />
         </div>
     )

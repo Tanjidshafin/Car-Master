@@ -8,9 +8,12 @@ import { AppContext } from "../context/AppContext"
 import swal from 'sweetalert';
 import { signOut } from "firebase/auth"
 import { auth } from "../../firebase.init"
-import { Heart, PlusCircle, User } from "lucide-react"
-import UseLiked from "../Hooks/UseLiked"
-import { RxCross1 } from "react-icons/rx";
+import { Bell, CalendarRange, Heart, MessageCircle, PlusCircle, Shield, Store, User } from "lucide-react"
+import UseUserRole from "../Hooks/UseUserRole"
+import { useNotifications } from "../Hooks/useNotifications"
+import NotificationList from "./notifications/NotificationList"
+import { NotificationListSkeleton } from "./dashboard/PremiumShell"
+import { normalizePaginatedData } from "../utils/pagination"
 const routes = [
     { name: "Home", path: "/" },
     { name: "All Cars", path: "/all-cars" },
@@ -18,22 +21,47 @@ const routes = [
 
 export default function Navbar() {
     const { user, handleLogin, favoriteCount } = useContext(AppContext)
+    const { role } = UseUserRole()
+    const isAdmin = role === "admin"
+    const isVendor = role === "vendor"
+    const { notificationsQuery, markRead } = useNotifications({ page: 1, limit: 10 })
+    const notificationsResponse = normalizePaginatedData(notificationsQuery.data, 1, 10)
+    const notifications = notificationsResponse.data.slice(0, 10)
+    const unreadCount = notificationsQuery.data?.unreadCount ?? notifications.filter((item) => !item.read).length
     const [isScrolled, setIsScrolled] = useState(false)
-    const [lastScrollY, setLastScrollY] = useState(0)
-    const [isVisible, setIsVisible] = useState(true)
-    const [favCars] = UseLiked()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [showLoginDropdown, setShowLoginDropdown] = useState(false)
-    const [showMobileLogin, setShowMobileLogin] = useState(false)
     const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+    const [showNotifications, setShowNotifications] = useState(false)
+    const [showMobileNotifications, setShowMobileNotifications] = useState(false)
     const [loading, setLoading] = useState(false)
     const [isDark, setIsDark] = useState(false)
     const locations = useLocation()
     const navigate = useNavigate()
+
+    const [loadingId, setLoadingId] = useState(null)
+
+    const handleNotificationClick = async (notification) => {
+        if (!notification?._id || loadingId === notification._id) return
+        try {
+            setLoadingId(notification._id)
+            if (!notification.read) {
+                await markRead.mutateAsync(notification._id)
+            }
+            setShowNotifications(false)
+            setShowMobileNotifications(false)
+            navigate(notification.route || "/notifications")
+        } catch (error) {
+            console.error("Error marking notification as read:", error)
+        } finally {
+            setLoadingId(null)
+        }
+    }
+
     useEffect(() => {
         setIsMobileMenuOpen(false)
+        setShowMobileNotifications(false)
         setShowLoginDropdown(false)
-        setShowMobileLogin(false)
         setShowProfileDropdown(false)
     }, [locations.pathname]),
         useEffect(() => {
@@ -42,34 +70,15 @@ export default function Navbar() {
             document.documentElement.setAttribute("data-theme", savedTheme)
             const handleScroll = () => {
                 const currentScrollY = window.scrollY
-                if (currentScrollY > lastScrollY && !showLoginDropdown && !showProfileDropdown) {
-                    setIsVisible(false)
-                } else {
-                    setIsVisible(true)
-                }
                 if (currentScrollY > window.innerHeight - 80) {
                     setIsScrolled(true)
                 } else {
                     setIsScrolled(false)
                 }
-
-                setLastScrollY(currentScrollY)
             }
             window.addEventListener("scroll", handleScroll)
             return () => window.removeEventListener("scroll", handleScroll)
-        }, [lastScrollY, showLoginDropdown, showProfileDropdown])
-
-    useEffect(() => {
-        if (showMobileLogin) {
-            document.body.style.overflow = "hidden"
-        } else {
-            document.body.style.overflow = "unset"
-        }
-
-        return () => {
-            document.body.style.overflow = "unset"
-        }
-    }, [showMobileLogin])
+        }, [])
 
     const toggleTheme = () => {
         const newDarkMode = !isDark
@@ -78,10 +87,8 @@ export default function Navbar() {
         document.documentElement.setAttribute("data-theme", newDarkMode ? "dark" : "light")
     }
 
-    const navVariants = {
-        hidden: { y: "-100%" },
-        visible: { y: 0 },
-    }
+    const navTextClass = isScrolled ? "text-gray-900 dark:text-white" : "text-gray-900 dark:text-white"
+    const navLinkBaseClass = isScrolled ? "text-gray-900 dark:text-white" : "text-gray-900 dark:text-white"
 
     const linkVariants = {
         hover: { scale: 1.05, transition: { type: "spring", stiffness: 300 } },
@@ -111,487 +118,578 @@ export default function Navbar() {
                 button: "Ok",
             });
         } finally {
-            locations.pathname === "/register" ? navigate("/") : ""
+            if (locations.pathname === "/register" || locations.pathname === "/login") {
+                navigate("/")
+            }
             setLoading(false)
             setShowLoginDropdown(false)
-            setShowMobileLogin(false)
             setIsMobileMenuOpen(false)
         }
     }
     return (
-        <AnimatePresence>
-            {(isVisible || showLoginDropdown || showProfileDropdown) && (
-                <motion.nav
-                    variants={navVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                    transition={{ type: "spring", stiffness: 100 }}
-                    className={`fixed top-0 w-full z-[1000] ${isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "backdrop-blur-md"}`}
-                >
-                    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center h-20">
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <NavLink to="/" className="flex items-center">
-                                    <img src={logo || "/placeholder.svg"} alt="Car Master" className="sm:h-8 h-6 w-auto" />
-                                    <motion.span
-                                        className={`ml-2 text-xl sm:text-2xl font-bold ${isScrolled ? "text-gray-900 dark:text-white" : "text-white"}`}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.2 }}
-                                    >
-                                        Car Master
-                                    </motion.span>
+        <motion.nav
+            initial={{ y: -24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 120, damping: 18 }}
+            className={`fixed top-0 w-full z-[1000] ${isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "bg-white/80 dark:bg-gray-900/40 backdrop-blur-md"}`}
+        >
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-20">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <NavLink to="/" className="flex items-center">
+                            <img src={logo || "/placeholder.svg"} alt="Car Master" className="sm:h-8 h-6 w-auto" />
+                            <motion.span
+                                className={`ml-2 text-xl sm:text-2xl font-bold ${navTextClass}`}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                Car Master
+                            </motion.span>
+                        </NavLink>
+                    </motion.div>
+
+                    <div className="hidden md:flex items-center space-x-8">
+                        {routes.map((item, index) => (
+                            <motion.div
+                                key={item.name}
+                                className="relative group"
+                                variants={linkVariants}
+                                whileHover="hover"
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 * index }}
+                            >
+                                <NavLink
+                                    to={`${item.path}`}
+                                    className={({ isActive }) =>
+                                        `before:bg-blue-500 before:h-[2px] before:transition-all before:duration-300 before:absolute relative before:rounded-full before:bottom-[-2px] transition-all duration-300 before:left-0 cursor-pointer capitalize ${isActive ? "before:w-full font-semibold text-blue-500" : "before:w-0 hover:before:w-full"
+                                        } ${navLinkBaseClass}`
+                                    }
+                                >
+                                    <span>{item.name}</span>
                                 </NavLink>
                             </motion.div>
+                        ))}
+                    </div>
 
-                            <div className="hidden md:flex items-center space-x-8">
-                                {routes.map((item, index) => (
-                                    <motion.div
-                                        key={item.name}
-                                        className="relative group"
-                                        variants={linkVariants}
-                                        whileHover="hover"
-                                        initial={{ opacity: 0, y: -20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.1 * index }}
+                    <div className="flex items-center space-x-2">
+                        <motion.button
+                            onClick={toggleTheme}
+                            className={`relative w-9 h-9 cursor-pointer sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${isDark ? "bg-gray-800" : "bg-yellow-400"
+                                }`}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            aria-label="Toggle theme"
+                        >
+                            <motion.div
+                                initial={false}
+                                animate={{ rotate: isDark ? 180 : 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="w-6 h-6"
+                            >
+                                {isDark ? (
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        className="w-6 h-6 text-gray-200"
                                     >
+                                        <path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                                    </svg>
+                                ) : (
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        className="w-6 h-6 text-yellow-600"
+                                    >
+                                        <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
+                                    </svg>
+                                )}
+                            </motion.div>
+                        </motion.button>
+                        {user && (
+                            <motion.button
+                                type="button"
+                                onClick={() => {
+                                    setShowMobileNotifications((prev) => !prev)
+                                    setIsMobileMenuOpen(false)
+                                    setShowProfileDropdown(false)
+                                }}
+                                className="relative flex md:hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-700 shadow-sm transition hover:border-sky-300 hover:text-sky-600 dark:border-white/10 dark:bg-white/8 dark:text-slate-100 dark:hover:border-sky-400/30 dark:hover:text-sky-300"
+                                variants={buttonVariants}
+                                whileHover="hover"
+                                whileTap="tap"
+                                aria-label="Open notifications"
+                            >
+                                <Bell className="h-5 w-5" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-semibold text-white shadow-lg">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </motion.button>)}
+                        {user && (<motion.button
+                            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                            className="flex md:hidden items-center"
+                            variants={buttonVariants}
+                            whileHover="hover"
+                            whileTap="tap"
+                        >
+                            <img
+                                src={user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Profile_photo_placeholder_square.svg/1024px-Profile_photo_placeholder_square.svg.png"}
+                                alt="Profile"
+                                className="w-9 h-9 cursor-pointer rounded-full object-cover"
+                            />
+                        </motion.button>)}
+                        <div className="hidden md:flex items-center space-x-4">
+                            {user && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowNotifications(!showNotifications)}
+                                        className="relative flex h-11 w-11 items-center justify-center rounded-full border cursor-pointer border-slate-200 bg-white/85 text-slate-700 shadow-sm transition hover:border-sky-300 hover:text-sky-600 dark:border-white/10 dark:bg-white/8 dark:text-slate-100 dark:hover:border-sky-400/30 dark:hover:text-sky-300"
+                                    >
+                                        <Bell className="w-5 h-5" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-semibold text-white shadow-lg">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
+                                    <AnimatePresence>
+                                        {showNotifications && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                className="absolute right-0 mt-3 w-[min(22rem,calc(100vw-1rem))] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white/95 p-3 text-slate-800 shadow-[0_20px_60px_rgba(148,163,184,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/95 dark:text-slate-100 dark:shadow-[0_24px_80px_rgba(15,23,42,0.55)]"
+                                            >
+                                                <div className="mb-3 flex items-start justify-between gap-3 border-b border-slate-200 pb-3 dark:border-white/10">
+                                                    <div>
+                                                        <h3 className="font-semibold">Notifications</h3>
+                                                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Recent marketplace alerts and updates.</p>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        <button className="shrink-0 text-xs cursor-pointer font-semibold text-slate-500 transition hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" onClick={() => {
+                                                            setShowNotifications(false)
+                                                            navigate("/notifications")
+                                                        }}>
+                                                            View all
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                {notificationsQuery.isPending && !notifications.length ? (
+                                                    <NotificationListSkeleton rows={4} />
+                                                ) : (
+                                                    <NotificationList notifications={notifications} onSelect={handleNotificationClick} compact loadingId={loadingId} />
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+                            {user ? (
+                                <motion.div className="relative">
+                                    <motion.button
+                                        onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                                        className="flex items-center space-x-2"
+                                        variants={buttonVariants}
+                                        whileHover="hover"
+                                        whileTap="tap"
+                                    >
+                                        <img
+                                            src={user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Profile_photo_placeholder_square.svg/1024px-Profile_photo_placeholder_square.svg.png"}
+                                            alt="Profile"
+                                            className="w-10 h-10 cursor-pointer rounded-full object-cover"
+                                        />
+                                    </motion.button>
+                                    <AnimatePresence>
+                                        {showProfileDropdown && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3"
+                                            >
+                                                {isAdmin && (
+                                                    <NavLink
+                                                        to="/admin"
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                    >
+                                                        <Shield className="w-5 h-5" />
+                                                        Admin Panel
+                                                    </NavLink>
+                                                )}
+                                                {isVendor && (
+                                                    <NavLink
+                                                        to="/vendor/dashboard"
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                    >
+                                                        <Store className="w-5 h-5" />
+                                                        Vendor Panel
+                                                    </NavLink>
+                                                )}
+                                                {role === "user" && (
+                                                    <NavLink
+                                                        to="/become-vendor"
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                    >
+                                                        <Store className="w-5 h-5" />
+                                                        Become Vendor
+                                                    </NavLink>
+                                                )}
+                                                <NavLink
+                                                    to="/favorites"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
+                                                >
+                                                    <Heart className="w-5 h-5" />
+                                                    My Favorites
+                                                    {favoriteCount > 0 && (
+                                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-green-500 rounded-full">
+                                                            {favoriteCount}
+                                                        </span>
+                                                    )}
+                                                </NavLink>
+                                                <NavLink
+                                                    to="/my-bookings"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                >
+                                                    <CalendarRange className="w-5 h-5" />
+                                                    My Bookings
+                                                </NavLink>
+                                                <NavLink
+                                                    to="/notifications"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                >
+                                                    <Bell className="w-5 h-5" />
+                                                    Notifications
+                                                </NavLink>
+                                                <NavLink
+                                                    to="/messages"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                >
+                                                    <MessageCircle className="w-5 h-5" />
+                                                    Messages
+                                                </NavLink>
+                                                <NavLink
+                                                    to="/profile"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                >
+                                                    <User className="w-5 h-5" />
+                                                    My Profile
+                                                </NavLink>
+                                                <NavLink
+                                                    to="/add-listing"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                >
+                                                    <PlusCircle className="w-5 h-5" />
+                                                    Add Listing
+                                                </NavLink>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            ) : (
+                                <>
+                                    <motion.div className="relative">
+                                        <motion.button
+                                            onClick={() => setShowLoginDropdown(!showLoginDropdown)}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 transition-colors"
+                                            variants={buttonVariants}
+                                            whileHover="hover"
+                                            whileTap="tap"
+                                        >
+                                            Login
+                                        </motion.button>
+                                        <AnimatePresence>
+                                            {showLoginDropdown && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -10 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+                                                >
+                                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                                        <div>
+                                                            <label
+                                                                htmlFor="email"
+                                                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                            >
+                                                                Email
+                                                            </label>
+                                                            <input
+                                                                type="email"
+                                                                id="email"
+                                                                name="email"
+                                                                className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label
+                                                                htmlFor="password"
+                                                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                            >
+                                                                Password
+                                                            </label>
+                                                            <input
+                                                                type="password"
+                                                                id="password"
+                                                                name="password"
+                                                                className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            />
+                                                        </div>
+                                                        <button
+                                                            type="submit"
+                                                            className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                                                        >
+                                                            {loading ? (<span className="loading loading-spinner loading-sm"></span>) : ""}      {loading ? "Signing In" : "Sign In"}
+                                                        </button>
+                                                    </form>
+                                                    <div className="mt-4 text-center">
+                                                        <NavLink to="/register" className="text-sm text-blue-500 hover:text-blue-600">
+                                                            Don&apos;t have an account? Register
+                                                        </NavLink>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </motion.div>
+
+                                    <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
                                         <NavLink
-                                            to={`${item.path}`}
+                                            to="/register"
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 transition-colors"
+                                        >
+                                            Register
+                                        </NavLink>
+                                    </motion.div>
+                                </>
+                            )}
+
+                            {user && (
+                                <motion.button
+                                    onClick={() => {
+                                        swal({
+                                            title: "Are you sure?",
+                                            text: "Are you sure, you want to logout?",
+                                            icon: "warning",
+                                            dangerMode: true,
+                                        })
+                                            .then(willDelete => {
+                                                if (willDelete) {
+                                                    swal("Logged Out!", "You Have Been Logged Out!", "success");
+                                                    signOut(auth)
+                                                    setShowLoginDropdown(false)
+                                                    navigate("/")
+                                                }
+                                            });
+                                    }}
+                                    className="bg-red-500 text-white cursor-pointer p-2 rounded-full hover:bg-red-600 transition-colors"
+                                    variants={logoutVariants}
+                                    whileHover="animate"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-6 w-6"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                        />
+                                    </svg>
+                                </motion.button>
+                            )}
+                        </div>
+
+                        <motion.button
+                            onClick={() => {
+                                setIsMobileMenuOpen(!isMobileMenuOpen)
+                                setShowMobileNotifications(false)
+                            }}
+                            className="md:hidden p-2"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                        >
+                            <div
+                                className={`w-6 h-0.5 mb-1.5 bg-gray-900 transition-all dark:bg-white ${isMobileMenuOpen ? "transform rotate-45 translate-y-2" : ""}`}
+                            />
+                            <div
+                                className={`w-6 h-0.5 mb-1.5 bg-gray-900 dark:bg-white ${isMobileMenuOpen ? "opacity-0" : ""}`}
+                            />
+                            <div
+                                className={`w-6 h-0.5 bg-gray-900 dark:bg-white ${isMobileMenuOpen ? "transform -rotate-45 -translate-y-2" : ""}`}
+                            />
+                        </motion.button>
+                    </div>
+                </div>
+
+                <AnimatePresence>
+                    {showMobileNotifications && user && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="overflow-hidden border-t border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 md:hidden"
+                        >
+                            <div className="px-4 py-4">
+                                <div className="mb-3 flex items-start justify-between gap-3 border-b border-slate-200 pb-3 dark:border-white/10">
+                                    <div>
+                                        <h3 className="font-semibold text-slate-900 dark:text-white">Notifications</h3>
+                                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Recent marketplace alerts and updates.</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="shrink-0 text-xs font-semibold text-slate-500 transition hover:text-slate-700 cursor-pointer dark:text-slate-400 dark:hover:text-slate-200"
+                                        onClick={() => {
+                                            setShowMobileNotifications(false)
+                                            navigate("/notifications")
+                                        }}
+                                    >
+                                        View all
+                                    </button>
+                                </div>
+                                {notificationsQuery.isPending && !notifications.length ? (
+                                    <NotificationListSkeleton rows={4} />
+                                ) : (
+                                    <NotificationList notifications={notifications} onSelect={handleNotificationClick} compact />
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                    {isMobileMenuOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="md:hidden overflow-hidden bg-white dark:bg-gray-900"
+                        >
+                            <div className="px-2 pt-2 pb-3 space-y-1">
+                                {routes.map((item) => (
+                                    <motion.div key={item.name} variants={linkVariants} whileHover="hover">
+                                        <NavLink
+                                            to={item.path}
                                             className={({ isActive }) =>
-                                                `before:bg-blue-500 before:h-[2px] before:transition-all before:duration-300 before:absolute relative before:rounded-full before:bottom-[-2px] transition-all duration-300 before:left-0 cursor-pointer capitalize ${isActive ? "before:w-full font-semibold text-blue-500" : "before:w-0 hover:before:w-full"
-                                                } ${isScrolled ? "text-gray-900 dark:text-white" : "text-white"}`
+                                                `block px-3 py-2 rounded-md transition-colors
+                                                        ${isActive
+                                                    ? "bg-blue-500 text-white font-semibold dark:bg-blue-600"
+                                                    : "text-gray-800 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900"
+                                                } 
+                                                        ${isScrolled ? "text-gray-900 dark:text-white" : "text-gray-800 dark:text-gray-200"}`
                                             }
                                         >
-                                            <span>{item.name}</span>
+                                            {item.name}
                                         </NavLink>
                                     </motion.div>
                                 ))}
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                                <motion.button
-                                    onClick={toggleTheme}
-                                    className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${isDark ? "bg-gray-800" : "bg-yellow-400"
-                                        }`}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    aria-label="Toggle theme"
-                                >
-                                    <motion.div
-                                        initial={false}
-                                        animate={{ rotate: isDark ? 180 : 0 }}
-                                        transition={{ duration: 0.5 }}
-                                        className="w-6 h-6"
-                                    >
-                                        {isDark ? (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24"
-                                                fill="currentColor"
-                                                className="w-6 h-6 text-gray-200"
-                                            >
-                                                <path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                                            </svg>
-                                        ) : (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24"
-                                                fill="currentColor"
-                                                className="w-6 h-6 text-yellow-600"
-                                            >
-                                                <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
-                                            </svg>
-                                        )}
-                                    </motion.div>
-                                </motion.button>
-                                {user && (<motion.button
-                                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                                    className="flex md:hidden items-center"
-                                    variants={buttonVariants}
-                                    whileHover="hover"
-                                    whileTap="tap"
-                                >
-                                    <img
-                                        src={user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Profile_photo_placeholder_square.svg/1024px-Profile_photo_placeholder_square.svg.png"}
-                                        alt="Profile"
-                                        className="w-9 h-9 cursor-pointer rounded-full object-cover"
-                                    />
-                                </motion.button>)}
-                                <div className="hidden md:flex items-center space-x-4">
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 pb-3">
                                     {user ? (
-                                        <motion.div className="relative">
-                                            <motion.button
-                                                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                                                className="flex items-center space-x-2"
-                                                variants={buttonVariants}
-                                                whileHover="hover"
-                                                whileTap="tap"
+                                        <>
+                                            {isAdmin && (
+                                                <NavLink
+                                                    to="/admin"
+                                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                >
+                                                    Admin Panel
+                                                </NavLink>
+                                            )}
+                                            {isVendor && (
+                                                <NavLink
+                                                    to="/vendor/dashboard"
+                                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                >
+                                                    Vendor Panel
+                                                </NavLink>
+                                            )}
+                                            {role === "user" && (
+                                                <NavLink
+                                                    to="/become-vendor"
+                                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                >
+                                                    Become Vendor
+                                                </NavLink>
+                                            )}
+                                            <NavLink
+                                                to="/favorites"
+                                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                                             >
-                                                <img
-                                                    src={user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Profile_photo_placeholder_square.svg/1024px-Profile_photo_placeholder_square.svg.png"}
-                                                    alt="Profile"
-                                                    className="w-10 h-10 cursor-pointer rounded-full object-cover"
-                                                />
-                                            </motion.button>
-                                            <AnimatePresence>
-                                                {showProfileDropdown && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0, y: -10 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        exit={{ opacity: 0, y: -10 }}
-                                                        transition={{ duration: 0.2 }}
-                                                        className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3"
-                                                    >
-                                                        <NavLink
-                                                            to="/favorites"
-                                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
-                                                        >
-                                                            <Heart className="w-5 h-5" />
-                                                            My Favorites
-                                                            {favoriteCount > 0 && (
-                                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-green-500 rounded-full">
-                                                                    {favoriteCount}
-                                                                </span>
-                                                            )}
-                                                        </NavLink>
-                                                        <NavLink
-                                                            to="/profile"
-                                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                                                        >
-                                                            <User className="w-5 h-5" />
-                                                            My Profile
-                                                        </NavLink>
-                                                        <NavLink
-                                                            to="/add-listing"
-                                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                                                        >
-                                                            <PlusCircle className="w-5 h-5" />
-                                                            Add Listing
-                                                        </NavLink>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </motion.div>
+                                                My Favorites
+                                            </NavLink>
+                                            <NavLink
+                                                to="/messages"
+                                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                            >
+                                                Messages
+                                            </NavLink>
+                                            <NavLink
+                                                to="/profile"
+                                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                            >
+                                                My Profile
+                                            </NavLink>
+                                            <button
+                                                onClick={() => {
+                                                    swal({
+                                                        title: "Are you sure?",
+                                                        text: "Are you sure, you want to logout?",
+                                                        icon: "warning",
+                                                        dangerMode: true,
+                                                    })
+                                                        .then(willDelete => {
+                                                            if (willDelete) {
+                                                                swal("Logged Out!", "You Have Been Logged Out!", "success");
+                                                                signOut(auth)
+                                                            }
+                                                            setShowLoginDropdown(false)
+                                                            setIsMobileMenuOpen(false)
+                                                            navigate("/")
+                                                        });
+                                                }}
+                                                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
+                                            >
+                                                Log out
+                                            </button>
+                                        </>
                                     ) : (
                                         <>
-                                            <motion.div className="relative">
-                                                <motion.button
-                                                    onClick={() => setShowLoginDropdown(!showLoginDropdown)}
-                                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 transition-colors"
-                                                    variants={buttonVariants}
-                                                    whileHover="hover"
-                                                    whileTap="tap"
+                                            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setIsMobileMenuOpen(false)
+                                                        navigate("/login", { state: { from: locations.pathname } })
+                                                    }}
+                                                    className="block px-3 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
                                                 >
-                                                    Login
-                                                </motion.button>
-                                                <AnimatePresence>
-                                                    {showLoginDropdown && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, y: -10 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            exit={{ opacity: 0, y: -10 }}
-                                                            transition={{ duration: 0.2 }}
-                                                            className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
-                                                        >
-                                                            <form onSubmit={handleSubmit} className="space-y-4">
-                                                                <div>
-                                                                    <label
-                                                                        htmlFor="email"
-                                                                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                                                    >
-                                                                        Email
-                                                                    </label>
-                                                                    <input
-                                                                        type="email"
-                                                                        id="email"
-                                                                        name="email"
-                                                                        className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label
-                                                                        htmlFor="password"
-                                                                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                                                    >
-                                                                        Password
-                                                                    </label>
-                                                                    <input
-                                                                        type="password"
-                                                                        id="password"
-                                                                        name="password"
-                                                                        className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                    />
-                                                                </div>
-                                                                <button
-                                                                    type="submit"
-                                                                    className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                                                                >
-                                                                    {loading ? (<span className="loading loading-spinner loading-sm"></span>) : ""}      {loading ? "Signing In" : "Sign In"}
-                                                                </button>
-                                                            </form>
-                                                            <div className="mt-4 text-center">
-                                                                <NavLink to="/register" className="text-sm text-blue-500 hover:text-blue-600">
-                                                                    Don't have an account? Register
-                                                                </NavLink>
-                                                            </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
+                                                    Log in
+                                                </button>
                                             </motion.div>
-
                                             <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
                                                 <NavLink
                                                     to="/register"
-                                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 transition-colors"
+                                                    className="block px-3 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
                                                 >
                                                     Register
                                                 </NavLink>
                                             </motion.div>
                                         </>
                                     )}
-
-                                    {user && (
-                                        <motion.button
-                                            onClick={() => {
-                                                swal({
-                                                    title: "Are you sure?",
-                                                    text: "Are you sure, you want to logout?",
-                                                    icon: "warning",
-                                                    dangerMode: true,
-                                                })
-                                                    .then(willDelete => {
-                                                        if (willDelete) {
-                                                            swal("Logged Out!", "You Have Been Logged Out!", "success");
-                                                            signOut(auth)
-                                                            setShowLoginDropdown(false)
-                                                            setShowMobileLogin(false)
-                                                            navigate("/")
-                                                        }
-                                                    });
-                                            }}
-                                            className="bg-red-500 text-white cursor-pointer p-2 rounded-full hover:bg-red-600 transition-colors"
-                                            variants={logoutVariants}
-                                            whileHover="animate"
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-6 w-6"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                                                />
-                                            </svg>
-                                        </motion.button>
-                                    )}
                                 </div>
-
-                                <motion.button
-                                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                    className="md:hidden p-2"
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                >
-                                    <div
-                                        className={`w-6 h-0.5 mb-1.5 transition-all ${isScrolled ? "bg-gray-900 dark:bg-white" : "bg-white"
-                                            } ${isMobileMenuOpen ? "transform rotate-45 translate-y-2" : ""}`}
-                                    />
-                                    <div
-                                        className={`w-6 h-0.5 mb-1.5 ${isScrolled ? "bg-gray-900 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "opacity-0" : ""
-                                            }`}
-                                    />
-                                    <div
-                                        className={`w-6 h-0.5 ${isScrolled ? "bg-gray-900 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "transform -rotate-45 -translate-y-2" : ""
-                                            }`}
-                                    />
-                                </motion.button>
                             </div>
-                        </div>
-
-                        <AnimatePresence>
-                            {isMobileMenuOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="md:hidden overflow-hidden bg-white dark:bg-gray-900"
-                                >
-                                    <div className="px-2 pt-2 pb-3 space-y-1">
-                                        {routes.map((item) => (
-                                            <motion.div key={item.name} variants={linkVariants} whileHover="hover">
-                                                <NavLink
-                                                    to={item.path}
-                                                    className={({ isActive }) =>
-                                                        `block px-3 py-2 rounded-md transition-colors
-                                                        ${isActive
-                                                            ? "bg-blue-500 text-white font-semibold dark:bg-blue-600"
-                                                            : "text-gray-800 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900"
-                                                        } 
-                                                        ${isScrolled ? "text-gray-900 dark:text-white" : "text-gray-800 dark:text-gray-200"}`
-                                                    }
-                                                >
-                                                    {item.name}
-                                                </NavLink>
-                                            </motion.div>
-                                        ))}
-                                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 pb-3">
-                                            {user ? (
-                                                <>
-                                                    <NavLink
-                                                        to="/dashboard"
-                                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                    >
-                                                        Dashboard
-                                                    </NavLink>
-                                                    <NavLink
-                                                        to="/favorites"
-                                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                    >
-                                                        My Favorites
-                                                    </NavLink>
-                                                    <NavLink
-                                                        to="/profile"
-                                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                    >
-                                                        My Profile
-                                                    </NavLink>
-                                                    <button
-                                                        onClick={() => {
-                                                            swal({
-                                                                title: "Are you sure?",
-                                                                text: "Are you sure, you want to logout?",
-                                                                icon: "warning",
-                                                                dangerMode: true,
-                                                            })
-                                                                .then(willDelete => {
-                                                                    if (willDelete) {
-                                                                        swal("Logged Out!", "You Have Been Logged Out!", "success");
-                                                                        signOut(auth)
-                                                                    }
-                                                                    setShowLoginDropdown(false)
-                                                                    setShowMobileLogin(false)
-                                                                    setIsMobileMenuOpen(false)
-                                                                    navigate("/")
-                                                                });
-                                                        }}
-                                                        className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
-                                                    >
-                                                        Log out
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-                                                        <NavLink
-                                                            onClick={() => setShowMobileLogin(true)}
-                                                            className="block px-3 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
-                                                        >
-                                                            Log in
-                                                        </NavLink>
-                                                    </motion.div>
-                                                    <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-                                                        <NavLink
-                                                            to="/register"
-                                                            className="block px-3 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
-                                                        >
-                                                            Register
-                                                        </NavLink>
-                                                    </motion.div>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                        <AnimatePresence>
-                            {showMobileLogin && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="w-full h-screen fixed top-0 left-0 z-[200000000] backdrop-blur-md flex items-center justify-center"
-                                >
-                                    <motion.div
-                                        initial={{ scale: 0, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        exit={{ scale: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="w-[90%] sm:w-[80%] md:w-[35%] bg-white dark:bg-gray-800 rounded-lg mx-auto mt-8 shadow-xl"
-                                    >
-                                        <div className="w-full flex items-end p-4 justify-between border-b border-gray-200 dark:border-gray-700">
-                                            <h1 className="text-[1.5rem] font-bold text-gray-800 dark:text-white">Login Form</h1>
-                                            <RxCross1
-                                                className="p-2 text-[2.5rem] hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-300 cursor-pointer text-gray-600 dark:text-gray-300"
-                                                onClick={() => setShowMobileLogin(false)}
-                                            />
-                                        </div>
-                                        <form className="flex flex-col gap-5 p-4" onSubmit={handleSubmit}>
-                                            <div>
-                                                <label htmlFor="email" className="text-[1rem] font-[500] text-gray-700 dark:text-gray-300">
-                                                    Email
-                                                </label>
-                                                <input
-                                                    type="email"
-                                                    name="email"
-                                                    id="email"
-                                                    placeholder="abc@gmail.com"
-                                                    className="py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md w-full focus:outline-none mt-1 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="password" className="text-[1rem] font-[500] text-gray-700 dark:text-gray-300">
-                                                    Password
-                                                </label>
-                                                <input
-                                                    type="password"
-                                                    name="password"
-                                                    id="password"
-                                                    placeholder="**********"
-                                                    className="py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md w-full focus:outline-none mt-1 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between w-full">
-                                                <div className="flex items-center gap-2">
-                                                    <input type="checkbox" name="checkbox" id="checkbox" className="w-[17px] h-[17px]" />
-                                                    <label htmlFor="checkbox" className="text-gray-600 dark:text-gray-300">
-                                                        Remember me
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <motion.button
-                                                type="submit"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                className="py-2 px-4 w-full bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300"
-                                            >
-                                                {loading ? (<span className="loading loading-spinner loading-xs"></span>) : ""}   {loading ? "Signing In..." : "Sign In"}
-                                            </motion.button>
-                                        </form>
-                                        <div className="flex items-center justify-center w-full pb-4">
-                                            <p className="text-[1rem] font-[400] text-gray-600 dark:text-gray-300">
-                                                Not have any account?{" "}
-                                                <NavLink to="/register" className="text-blue-500 underline hover:text-blue-600">
-                                                    Sign Up
-                                                </NavLink>
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </motion.nav>
-            )}
-        </AnimatePresence>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </motion.nav>
     )
 }
 

@@ -8,6 +8,21 @@
   font-family: 'Poppins', serif;
   transition: background-color var(--transition-duration) ease, border-color var(--transition-duration) ease;
 }
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] body {
+  background: #020617;
+  color: #e2e8f0;
+}
+
+#root {
+  min-height: 100vh;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;

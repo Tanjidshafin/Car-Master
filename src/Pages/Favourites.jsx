@@ -237,7 +237,7 @@ export default function Favourites() {
 
                                         <div className="flex justify-between items-center">
                                             <p className="text-2xl font-bold text-primary dark:text-white">${car.price.toLocaleString()}</p>
-                                            <NavLink to={`/car/${car.id}`}>
+                                            <NavLink to={`/car/${car.carId || car.id}`}>
                                                 <motion.button
                                                     className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-colors duration-300"
                                                     whileHover={{ scale: 1.05 }}

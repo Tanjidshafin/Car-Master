@@ -3,8 +3,11 @@ import { useLocation } from "react-router";
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase.init";
 import swal from "sweetalert";
+import BaseUrl from "../Hooks/BaseUrl";
+import { connectSocket, disconnectSocket } from "../services/socket";
 export const AppContext = createContext();
 const AppContextProvider = (props) => {
+    const link = BaseUrl()
     const locations = useLocation()
     const [loading, setLoading] = useState(true)
     const [user, setUser] = useState(() => {
@@ -18,14 +21,32 @@ const AppContextProvider = (props) => {
             setUser(user)
             if (user) {
                 localStorage.setItem("user", JSON.stringify(user));
+                connectSocket()
+                link.put("/users/sync", {
+                    email: user.email,
+                    uid: user.uid,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL
+                }).catch((error) => {
+                    console.log("Failed to sync user:", error?.message || error);
+                })
             } else {
                 localStorage.removeItem("user");
                 setFavCount(null)
+                disconnectSocket()
             }
             setLoading(false)
         })
         return unsubscribe
     }, [])
+
+    const updateSessionUser = (patch) => {
+        setUser((prevUser) => {
+            const nextUser = prevUser ? { ...prevUser, ...patch } : patch
+            localStorage.setItem("user", JSON.stringify(nextUser))
+            return nextUser
+        })
+    }
     const handleRegister = (email, password, name, image) => {
         return createUserWithEmailAndPassword(auth, email, password)
             .then(res => {
@@ -65,7 +86,7 @@ const AppContextProvider = (props) => {
     };
 
 
-    const value = { handleRegister, user, handleLogin, loading, setUser, favoriteCount, setFavCount }
+    const value = { handleRegister, user, handleLogin, loading, setUser, updateSessionUser, favoriteCount, setFavCount }
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 }
 export default AppContextProvider;
